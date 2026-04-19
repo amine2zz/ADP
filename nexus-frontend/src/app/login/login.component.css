@@ -1,0 +1,79 @@
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--adp-light-gray);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Overlays the dashboard shell */
+}
+
+.login-box {
+  background: var(--adp-white);
+  padding: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.adp-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo-text {
+  color: var(--adp-red);
+  font-size: 2.5rem;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.adp-login-header h2 {
+  color: var(--adp-charcoal);
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  font-weight: 500;
+  color: var(--adp-dark-gray);
+  font-size: 0.9rem;
+}
+
+input {
+  padding: 0.75rem;
+  border: 1px solid var(--adp-border);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--adp-red);
+  box-shadow: 0 0 0 2px rgba(208, 39, 29, 0.1);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+}

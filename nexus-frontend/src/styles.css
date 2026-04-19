@@ -1,0 +1,59 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  /* ADP Brand Colors */
+  --adp-red: #D0271D;
+  --adp-red-dark: #A81E15;
+  --adp-charcoal: #231F20;
+  --adp-dark-gray: #4B4B4B;
+  --adp-light-gray: #F3F4F6;
+  --adp-border: #E5E7EB;
+  --adp-white: #FFFFFF;
+
+  /* Fonts */
+  --font-family: 'Inter', 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--adp-light-gray);
+  color: var(--adp-charcoal);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--adp-charcoal);
+}
+
+a {
+  color: var(--adp-red);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--adp-red-dark);
+}
+
+/* Common UI Utility Classes */
+.btn-primary {
+  background-color: var(--adp-red);
+  color: var(--adp-white);
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--adp-red-dark);
+}
