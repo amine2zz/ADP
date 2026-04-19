@@ -21,6 +21,12 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private com.adp.hcm.service.HRManagementService hrService;
+
+    @Autowired
+    private com.adp.hcm.repository.EmployeeRepository employeeRepository;
+
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Optional<Employee> emp = employeeService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
@@ -68,5 +74,17 @@ public class EmployeeController {
     public ResponseEntity<Employee> updateManager(@PathVariable("id") Long id, @RequestBody Map<String, Long> payload) {
         Employee updated = employeeService.updateManager(id, payload.get("managerId"));
         return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/employees/{id}/leaves")
+    public ResponseEntity<?> submitLeave(@PathVariable("id") Long id, @RequestBody com.adp.hcm.entity.LeaveRequest leave) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
+        return ResponseEntity.ok(hrService.submitLeaveRequest(employee, leave));
+    }
+
+    @PostMapping("/employees/{id}/attendance")
+    public ResponseEntity<?> logAttendance(@PathVariable("id") Long id, @RequestBody Map<String, Boolean> payload) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
+        return ResponseEntity.ok(hrService.logAttendance(employee, payload.get("clockIn")));
     }
 }

@@ -49,6 +49,30 @@ public class Employee {
 
     // Account Status & Activation
     private String status = "PENDING_SETUP"; // PENDING_SETUP, ACTIVE, INACTIVE
+
+    @Column(name = "cin", unique = true)
+    private String cin;
+
+    @Column(name = "employee_code", unique = true)
+    private String employeeCode;
+
+    private String gender;
+
+    @Column(name = "marital_status")
+    private String maritalStatus;
+
+    private String nationality;
+
+    private String situation;
+
+    @Column(name = "emergency_contact")
+    private String emergencyContact;
+
+    @Column(name = "joining_date")
+    private String joiningDate;
+
+    @Column(name = "job_title")
+    private String jobTitle;
     
     @Column(name = "activation_token", unique = true)
     private String activationToken;

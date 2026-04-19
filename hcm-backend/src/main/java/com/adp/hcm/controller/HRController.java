@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hr")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class HRController {
 
     @Autowired
@@ -21,6 +21,16 @@ public class HRController {
     @GetMapping("/history")
     public List<OperationHistory> getHistory() {
         return hrService.getHistory();
+    }
+
+    @GetMapping("/all-leaves")
+    public List<LeaveRequest> getAllLeaves() {
+        return hrService.getAllLeaves();
+    }
+
+    @GetMapping("/all-attendance")
+    public List<Attendance> getAllAttendance() {
+        return hrService.getAllAttendance();
     }
 
     @GetMapping("/manager/{id}/leaves")

@@ -24,4 +24,14 @@ public class DepartmentService {
     public Department findDepartmentById(Long id) {
         return departmentRepository.findById(id).orElseThrow(() -> new RuntimeException("Department not found"));
     }
+
+    public Department updateDepartment(Long id, Department updatedData) {
+        Department existing = findDepartmentById(id);
+        if (updatedData.getName() != null) existing.setName(updatedData.getName());
+        if (updatedData.getDescription() != null) existing.setDescription(updatedData.getDescription());
+        if (updatedData.getLocation() != null) existing.setLocation(updatedData.getLocation());
+        if (updatedData.getBudgetCode() != null) existing.setBudgetCode(updatedData.getBudgetCode());
+        if (updatedData.getManagerId() != null) existing.setManagerId(updatedData.getManagerId());
+        return departmentRepository.save(existing);
+    }
 }

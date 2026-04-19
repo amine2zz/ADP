@@ -22,17 +22,32 @@ public class DataSeeder {
             Department hr = departmentRepository.findAll().stream()
                 .filter(d -> d.getName().equals("Human Resources"))
                 .findFirst()
-                .orElseGet(() -> departmentRepository.save(new Department(null, "Human Resources", "Manages employee relations and benefits.")));
+                .orElseGet(() -> {
+                    Department d = new Department();
+                    d.setName("Human Resources");
+                    d.setDescription("Manages employee relations and benefits.");
+                    return departmentRepository.save(d);
+                });
             
             Department eng = departmentRepository.findAll().stream()
                 .filter(d -> d.getName().equals("Engineering"))
                 .findFirst()
-                .orElseGet(() -> departmentRepository.save(new Department(null, "Engineering", "Develops core software and platform architecture.")));
+                .orElseGet(() -> {
+                    Department d = new Department();
+                    d.setName("Engineering");
+                    d.setDescription("Develops core software and platform architecture.");
+                    return departmentRepository.save(d);
+                });
 
             Department mkt = departmentRepository.findAll().stream()
                 .filter(d -> d.getName().equals("Marketing"))
                 .findFirst()
-                .orElseGet(() -> departmentRepository.save(new Department(null, "Marketing", "Handles public relations and media.")));
+                .orElseGet(() -> {
+                    Department d = new Department();
+                    d.setName("Marketing");
+                    d.setDescription("Handles public relations and media.");
+                    return departmentRepository.save(d);
+                });
 
             // 2. Ensure Master Admin exists
             if (!employeeRepository.existsByEmail("admin@adp.com")) {

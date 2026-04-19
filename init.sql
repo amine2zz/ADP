@@ -8,7 +8,10 @@ USE adp_hcm;
 CREATE TABLE IF NOT EXISTS department (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     department_name VARCHAR(100) NOT NULL UNIQUE,
-    description VARCHAR(255)
+    description VARCHAR(255),
+    location VARCHAR(200),
+    budget_code VARCHAR(50),
+    manager_id BIGINT
 );
 
 -- 4. Create the Employee table
@@ -20,6 +23,15 @@ CREATE TABLE IF NOT EXISTS employee (
     department_id BIGINT,
     role VARCHAR(50) DEFAULT 'EMPLOYEE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    cin VARCHAR(50) UNIQUE,
+    employee_code VARCHAR(50) UNIQUE,
+    gender VARCHAR(10),
+    marital_status VARCHAR(50),
+    nationality VARCHAR(100),
+    situation VARCHAR(100),
+    emergency_contact VARCHAR(150),
+    joining_date VARCHAR(50),
+    job_title VARCHAR(150),
     FOREIGN KEY (department_id) REFERENCES department(id)
 );
 

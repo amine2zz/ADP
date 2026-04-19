@@ -23,4 +23,13 @@ public class Department {
 
     private String description;
 
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "budget_code")
+    private String budgetCode;
+
+    @Column(name = "manager_id")
+    private Long managerId;
+
 }

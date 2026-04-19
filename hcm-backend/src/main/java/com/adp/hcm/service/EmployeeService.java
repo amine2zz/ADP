@@ -99,4 +99,31 @@ public class EmployeeService {
         
         return employeeRepository.save(employee);
     }
+
+    public Employee updateEmployee(Long id, Employee updatedData) {
+        Employee existing = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
+        
+        if (updatedData.getFirstName() != null) existing.setFirstName(updatedData.getFirstName());
+        if (updatedData.getLastName() != null) existing.setLastName(updatedData.getLastName());
+        if (updatedData.getCin() != null) existing.setCin(updatedData.getCin());
+        if (updatedData.getEmployeeCode() != null) existing.setEmployeeCode(updatedData.getEmployeeCode());
+        if (updatedData.getGender() != null) existing.setGender(updatedData.getGender());
+        if (updatedData.getMaritalStatus() != null) existing.setMaritalStatus(updatedData.getMaritalStatus());
+        if (updatedData.getNationality() != null) existing.setNationality(updatedData.getNationality());
+        if (updatedData.getSituation() != null) existing.setSituation(updatedData.getSituation());
+        if (updatedData.getEmergencyContact() != null) existing.setEmergencyContact(updatedData.getEmergencyContact());
+        if (updatedData.getJoiningDate() != null) existing.setJoiningDate(updatedData.getJoiningDate());
+        if (updatedData.getJobTitle() != null) existing.setJobTitle(updatedData.getJobTitle());
+        if (updatedData.getAddress() != null) existing.setAddress(updatedData.getAddress());
+        if (updatedData.getPhoneNumber() != null) existing.setPhoneNumber(updatedData.getPhoneNumber());
+        if (updatedData.getDateOfBirth() != null) existing.setDateOfBirth(updatedData.getDateOfBirth());
+        
+        if (updatedData.getRole() != null) existing.setRole(updatedData.getRole());
+        if (updatedData.getDepartment() != null) existing.setDepartment(updatedData.getDepartment());
+        if (updatedData.getStatus() != null) existing.setStatus(updatedData.getStatus());
+        
+        hrService.logOperation("SYSTEM", "PROFILE_UPDATE", existing.getEmail(), "Profile was successfully updated");
+        
+        return employeeRepository.save(existing);
+    }
 }
