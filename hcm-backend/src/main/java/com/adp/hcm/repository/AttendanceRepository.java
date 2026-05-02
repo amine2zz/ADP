@@ -10,6 +10,9 @@ import java.util.Optional;
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<Attendance> findByEmployeeManagerId(Long managerId);
-    List<Attendance> findByEmployeeId(Long employeeId);
+    
+    @org.springframework.data.jpa.repository.Query("SELECT a FROM Attendance a WHERE a.employee.id = :employeeId")
+    List<Attendance> findByEmployeeId(@org.springframework.data.repository.query.Param("employeeId") Long employeeId);
+
     Optional<Attendance> findByEmployeeIdAndWorkDate(Long employeeId, LocalDate workDate);
 }

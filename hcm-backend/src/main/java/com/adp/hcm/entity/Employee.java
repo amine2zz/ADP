@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "employee")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Employee {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -81,6 +83,16 @@ public class Employee {
     @JoinColumn(name = "manager_id")
     @JsonIgnoreProperties({"department", "manager"})
     private Employee manager;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id")
+    private EmployeeCategory category;
+
+    @Column(name = "leave_balance")
+    private Double leaveBalance = 0.0;
+
+    @Column(name = "sick_leave_balance", columnDefinition = "DOUBLE DEFAULT 0.0")
+    private Double sickLeaveBalance = 0.0;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

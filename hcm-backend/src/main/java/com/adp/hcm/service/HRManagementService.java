@@ -5,13 +5,16 @@ import com.adp.hcm.entity.LeaveRequest;
 import com.adp.hcm.entity.OperationHistory;
 import com.adp.hcm.entity.Employee;
 import com.adp.hcm.repository.AttendanceRepository;
+import com.adp.hcm.repository.EmployeeRepository;
 import com.adp.hcm.repository.LeaveRequestRepository;
 import com.adp.hcm.repository.OperationHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -25,6 +28,9 @@ public class HRManagementService {
 
     @Autowired
     private OperationHistoryRepository historyRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     public void logOperation(String actor, String operation, String target, String description) {
         OperationHistory history = new OperationHistory();
@@ -48,10 +54,41 @@ public class HRManagementService {
         return leaveRequestRepository.findAll();
     }
 
+    @Transactional
     public LeaveRequest updateLeaveStatus(Long leaveId, String status, String managerEmail) {
         LeaveRequest request = leaveRequestRepository.findById(leaveId)
             .orElseThrow(() -> new RuntimeException("Request not found"));
+        
+        String oldStatus = request.getStatus();
         request.setStatus(status);
+        
+        // If the leave was just approved, deduct from the employee's balance
+        if ("APPROVED".equals(status) && !"APPROVED".equals(oldStatus)) {
+            // Fetch fresh employee to avoid stale data
+            Employee emp = employeeRepository.findById(request.getEmployee().getId())
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+            
+            long days = 0;
+            LocalDate current = request.getStartDate();
+            while (!current.isAfter(request.getEndDate())) {
+                if (current.getDayOfWeek().getValue() < 6) { // Monday (1) to Friday (5)
+                    days++;
+                }
+                current = current.plusDays(1);
+            }
+            
+            if ("SICK".equalsIgnoreCase(request.getType())) {
+                double currentSick = emp.getSickLeaveBalance() != null ? emp.getSickLeaveBalance() : 0.0;
+                emp.setSickLeaveBalance(currentSick - days);
+            } else if ("ANNUAL".equalsIgnoreCase(request.getType())) {
+                double currentAnnual = emp.getLeaveBalance() != null ? emp.getLeaveBalance() : 0.0;
+                emp.setLeaveBalance(currentAnnual - (double)days);
+            }
+            
+            employeeRepository.save(emp);
+            // Refresh employee in request object for logging
+            request.setEmployee(emp);
+        }
         
         logOperation(managerEmail, "LEAVE_" + status, request.getEmployee().getEmail(), "Manager updated leave status to " + status);
         

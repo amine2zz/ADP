@@ -21,14 +21,22 @@ import { NotificationService } from '../services/notification.service';
           <div class="kpi-trend positive">Active Team Members</div>
         </div>
         <div class="kpi-card" style="border-top: 4px solid #1967D2;">
-          <div class="kpi-title">Pending Approvals</div>
-          <div class="kpi-value">3</div>
-          <div class="kpi-trend">Leave requests</div>
+          <div class="kpi-title">My Annual Leave</div>
+          <div class="kpi-value">📅 {{ employeeData?.leaveBalance?.toFixed(1) || '0.0' }}d</div>
+          <div class="kpi-trend">
+            <strong style="color: #1967D2;">{{ employeeData?.category?.name || 'Standard' }} Policy</strong>
+            <div *ngIf="employeeData?.category" style="font-size:0.75rem; margin-top:0.25rem;">
+              <div>{{ employeeData.category.description }}</div>
+              <div style="color:gray; margin-top:0.1rem;">
+                {{ employeeData.category.annualLeaveAllowance }}d/year &middot; +{{ employeeData.category.monthlyIncrement?.toFixed(2) }}d/mo
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="kpi-card" style="border-top: 4px solid #137333;">
-          <div class="kpi-title">Team Performance</div>
-          <div class="kpi-value">4.5 / 5</div>
-          <div class="kpi-trend positive">Average Rating</div>
+        <div class="kpi-card" style="border-top: 4px solid #ef4444;">
+          <div class="kpi-title">My Sick Leave</div>
+          <div class="kpi-value">💊 {{ employeeData?.sickLeaveBalance?.toFixed(1) || '0.0' }}d</div>
+          <div class="kpi-trend">Remaining balance</div>
         </div>
       </div>
 
@@ -140,6 +148,7 @@ import { NotificationService } from '../services/notification.service';
 })
 export class ManagerDashboardComponent implements OnInit {
   userName: string = 'Manager';
+  employeeData: any = {};
   subordinates: any[] = [];
   leaves: any[] = [];
   currentTab: any = 'team';
@@ -159,6 +168,14 @@ export class ManagerDashboardComponent implements OnInit {
         next: (data) => this.subordinates = data,
         error: (err) => console.error("Error fetching subordinates", err)
       });
+
+      this.http.get<any[]>(`http://localhost:8085/api/employees`).subscribe({
+        next: (employees: any[]) => {
+          const me = employees.find((e: any) => e.id === Number(this.userId));
+          if (me) { this.employeeData = me; }
+        }
+      });
+
       this.fetchLeaves();
     }
   }

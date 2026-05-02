@@ -25,9 +25,14 @@ export class LoginComponent {
 
     this.http.post('http://localhost:8085/api/auth/login', { email, password }).subscribe({
       next: (user: any) => {
+        // Store session tokens and basic info
         localStorage.setItem('adp_role', user.role);
         localStorage.setItem('adp_user', user.firstName + ' ' + user.lastName);
-        localStorage.setItem('adp_user_id', user.id);
+        localStorage.setItem('adp_user_id', user.id.toString());
+        
+        // Store full user object for instant dashboard hydration
+        localStorage.setItem('adp_user_full', JSON.stringify(user));
+        
         this.notifService.show(`Welcome back, ${user.firstName}!`, 'success');
         
         if (user.role === 'HR_ADMIN') {

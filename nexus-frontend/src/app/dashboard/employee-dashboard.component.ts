@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
@@ -38,11 +38,15 @@ import { FormsModule } from '@angular/forms';
               <span class="timer-label">{{ activeTimer }}</span>
               <span class="timer-value">{{ elapsedDisplay }}</span>
             </div>
-            <div class="att-quick" *ngIf="!activeTimer && today?.eveningOut">
+            <div class="att-quick" *ngIf="!activeTimer && loadingAttendance">
+              <span class="timer-label">⏱ Calculating...</span>
+              <span class="timer-value" style="font-size:0.8rem; color:var(--adp-dark-gray)">🔄 Synchronizing</span>
+            </div>
+            <div class="att-quick" *ngIf="!activeTimer && !loadingAttendance && today?.eveningOut">
               <span class="timer-label">✅ Day complete</span>
               <span class="timer-value" style="font-size:0.9rem; color:#16a34a">{{ getLiveTotalDuration() }}</span>
             </div>
-            <div class="att-quick" *ngIf="!activeTimer && !today?.eveningOut && !today?.morningIn">
+            <div class="att-quick" *ngIf="!activeTimer && !loadingAttendance && !today?.eveningOut && !today?.morningIn">
               <span class="timer-label">Not started</span>
             </div>
             <span class="att-arrow">›</span>
@@ -61,17 +65,25 @@ import { FormsModule } from '@angular/forms';
         <div class="kpi-card" style="--accent: #1967D2">
           <div class="kpi-icon" style="background:#dbeafe; color:#1967D2">📅</div>
           <div>
-            <div class="kpi-title">Leave Balance</div>
-            <div class="kpi-value">12 <span style="font-size:1rem;font-weight:500">days</span></div>
-            <div class="kpi-trend">Annual remaining</div>
+            <div class="kpi-title">My Annual Leave</div>
+            <div class="kpi-value">📅 {{ employeeData?.leaveBalance?.toFixed(1) || '0.0' }}d</div>
+            <div class="kpi-trend">
+              <strong style="color: #1967D2;">{{ employeeData?.category?.name || 'Standard' }} Policy</strong>
+              <div *ngIf="employeeData?.category" style="font-size:0.75rem; margin-top:0.25rem;">
+                <div>{{ employeeData.category.description }}</div>
+                <div style="color:gray; margin-top:0.1rem;">
+                  {{ employeeData.category.annualLeaveAllowance }}d/year &middot; +{{ employeeData.category.monthlyIncrement?.toFixed(2) }}d/mo
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="kpi-card" style="--accent: #137333">
-          <div class="kpi-icon" style="background:#dcfce7; color:#137333">✅</div>
+        <div class="kpi-card" style="--accent: #ef4444">
+          <div class="kpi-icon" style="background:#fee2e2; color:#ef4444">💊</div>
           <div>
-            <div class="kpi-title">Account Status</div>
-            <div class="kpi-value" style="font-size:1.3rem">{{ employeeData?.status || 'Active' }}</div>
-            <div class="kpi-trend positive">Fully configured</div>
+            <div class="kpi-title">Sick Leave Bank</div>
+            <div class="kpi-value">💊 {{ employeeData?.sickLeaveBalance?.toFixed(1) || '0.0' }}d</div>
+            <div class="kpi-trend">Remaining balance</div>
           </div>
         </div>
       </div>
@@ -99,19 +111,88 @@ import { FormsModule } from '@angular/forms';
             </div>
             <button type="submit" class="btn-primary" style="width:100%">Submit Request</button>
           </form>
+
+          <!-- History Table -->
+          <div style="margin-top: 2rem;">
+            <h4 class="section-title" style="font-size: 0.85rem; margin-bottom: 0.75rem;">My Leave Requests History</h4>
+            <div class="table-container" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--adp-border); border-radius: 6px;">
+              <table class="adp-table" style="font-size: 0.75rem;">
+                <thead><tr><th>Dates</th><th>Type</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let req of myLeaves">
+                    <td>{{ req.startDate | date:'dd MMM' }} - {{ req.endDate | date:'dd MMM' }}</td>
+                    <td>{{ req.type }}</td>
+                    <td><span [class]="'badge-' + req.status.toLowerCase()">{{ req.status }}</span></td>
+                  </tr>
+                  <tr *ngIf="myLeaves.length === 0"><td colspan="3" style="text-align:center; padding:1rem; color:gray;">No requests yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div class="card">
-          <h3 class="section-title">👤 My Profile</h3>
-          <div class="profile-list">
-            <div class="profile-row"><span class="profile-label">Full Name</span><span class="profile-val">{{ employeeData?.firstName }} {{ employeeData?.lastName }}</span></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+             <h3 class="section-title" style="margin:0;">📅 My Attendance Calendar</h3>
+             <div style="display:flex; gap:0.5rem; align-items:center;">
+               <span style="font-size:0.8rem; font-weight:700; color:#64748b;">{{ navigationDate | date:'MMMM yyyy' }}</span>
+               <div class="cal-nav">
+                 <button (click)="changeMonth(-1)" class="nav-btn">‹</button>
+                 <button (click)="changeMonth(1)" class="nav-btn">›</button>
+               </div>
+             </div>
+          </div>
+          
+          <div class="personal-calendar monthly">
+            <div class="cal-row header">
+              <div class="cal-cell" *ngFor="let dayName of ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']">
+                <div class="day-name">{{ dayName }}</div>
+              </div>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-cell" *ngFor="let day of monthDays" 
+                   [style.background-color]="getDayColor(day.date)" 
+                   [title]="getDayTitle(day.date)"
+                   [class.weekend]="isWeekend(day.date)"
+                   [class.is-today]="day.isToday">
+                <div class="day-num">{{ day.date | date:'d' }}</div>
+                <div class="day-status">{{ getDayLabel(day.date) }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:1rem; margin-top:1rem; font-size:0.65rem; font-weight:700; color:#64748b; justify-content:center;">
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#137333; border-radius:2px;"></span> Worked</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#1967D2; border-radius:2px;"></span> Annual</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#ef4444; border-radius:2px;"></span> Sick</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; background:#f59e0b; border-radius:2px;"></span> Unpaid</div>
+          </div>
+
+          <div class="profile-list" style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--adp-border);">
             <div class="profile-row"><span class="profile-label">Email</span><span class="profile-val">{{ employeeData?.email || '—' }}</span></div>
             <div class="profile-row"><span class="profile-label">Phone</span><span class="profile-val">{{ employeeData?.phoneNumber || '—' }}</span></div>
-            <div class="profile-row"><span class="profile-label">CIN</span><span class="profile-val">{{ employeeData?.cin || '—' }}</span></div>
-            <div class="profile-row"><span class="profile-label">Nationality</span><span class="profile-val">{{ employeeData?.nationality || '—' }}</span></div>
-            <div class="profile-row"><span class="profile-label">Marital Status</span><span class="profile-val">{{ employeeData?.maritalStatus || '—' }}</span></div>
-            <div class="profile-row"><span class="profile-label">Emergency</span><span class="profile-val">{{ employeeData?.emergencyContact || '—' }}</span></div>
-            <div class="profile-row"><span class="profile-label">Address</span><span class="profile-val">{{ employeeData?.address || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-label">Job Title</span><span class="profile-val">{{ employeeData?.jobTitle || 'Employee' }}</span></div>
+            <div class="profile-row" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+              <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span class="profile-label">Category</span>
+                <span class="profile-val" style="color:#1967D2; font-weight:700">{{ employeeData?.category?.name || '—' }}</span>
+              </div>
+              <div *ngIf="employeeData?.category" style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; width: 100%; font-size: 0.75rem; border: 1px solid var(--adp-border);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: #64748b;">Annual Allowance:</span>
+                  <span style="font-weight: 700; color: #1e293b;">📅 {{ employeeData.category.annualLeaveAllowance }} days</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: #64748b;">Sick Allowance:</span>
+                  <span style="font-weight: 700; color: #ef4444;">💊 {{ employeeData.category.sickLeaveAllowance }} days</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: #64748b;">Accrual Rate:</span>
+                  <span style="font-weight: 700; color: #1967D2;">+{{ employeeData.category.monthlyIncrement?.toFixed(2) }}d/month</span>
+                </div>
+                <p style="margin-top: 0.5rem; color: #64748b; font-style: italic; line-height: 1.3;">{{ employeeData.category.description }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -245,8 +326,8 @@ import { FormsModule } from '@angular/forms';
     .welcome-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--adp-red), #ff6b6b); color: white; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
     .welcome-banner h2 { color: white; font-size: 1.4rem; margin-bottom: 0.25rem; }
     .welcome-banner p { color: rgba(255,255,255,0.65); font-size: 0.875rem; }
-
-    .kpi-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.25rem; }
+    
+    .kpi-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1.25rem; }
     .kpi-card { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; }
     .kpi-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
 
@@ -312,6 +393,41 @@ import { FormsModule } from '@angular/forms';
     .profile-label { color: var(--adp-dark-gray); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
     .profile-val { color: var(--adp-charcoal); font-weight: 500; text-align: right; max-width: 60%; word-break: break-word; }
     .main-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem; }
+    .personal-calendar.monthly { border: 1px solid var(--adp-border); border-radius: 8px; overflow: hidden; background: white; }
+    .cal-row.header { display: grid; grid-template-columns: repeat(7, 1fr); background: #f8fafc; border-bottom: 1px solid var(--adp-border); width: 100%; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); width: 100%; }
+    .cal-cell { padding: 0.5rem 0.2rem; text-align: center; border-right: 1px solid var(--adp-border); border-bottom: 1px solid var(--adp-border); position: relative; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .cal-cell:nth-child(7n) { border-right: none; }
+    .cal-cell.weekend { background-color: #f1f5f9 !important; }
+    .cal-cell.weekend .day-num { color: #64748b; }
+    .cal-cell.is-today { 
+      border: 2.5px solid #1967D2 !important; 
+      box-shadow: inset 0 0 0 1px #fff;
+      z-index: 2;
+    }
+    .cal-cell.is-today .day-num {
+      background: #1967D2;
+      color: white;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      top: 2px;
+      left: 4px;
+      padding: 0;
+    }
+    .day-name { font-size: 0.7rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.02em; }
+    .day-num { font-size: 0.7rem; font-weight: 700; color: #94a3b8; position: absolute; top: 4px; left: 6px; }
+    .other-month { opacity: 0.3; }
+    .day-status { margin-top: 14px; font-size: 0.85rem; text-align: center; line-height: 1; }
+    .cal-nav { display: flex; gap: 0.4rem; }
+    .nav-btn { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--adp-border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: #64748b; }
+    .nav-btn:hover { background: #f1f5f9; color: var(--adp-red); }
+    .badge-approved { background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+    .badge-pending { background: #fef9c3; color: #854d0e; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+    .badge-rejected { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
   `]
 })
 export class EmployeeDashboardComponent implements OnInit, OnDestroy {
@@ -324,6 +440,11 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
   elapsedDisplay: string = '00:00:00';
   activeTimer: string = '';
   totalWorked: string = '';
+  loadingAttendance: boolean = true;
+  myLeaves: any[] = [];
+  myAttendance: any[] = [];
+  monthDays: any[] = [];
+  navigationDate: Date = new Date();
   todayDate: string = new Date().toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
   private timerInterval: any = null;
   private timerStart: Date | null = null;
@@ -337,29 +458,179 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     return 'DONE';
   }
 
-  constructor(private http: HttpClient, private notifService: NotificationService) {}
+  constructor(
+    private http: HttpClient, 
+    private notifService: NotificationService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.userName = localStorage.getItem('adp_user') || 'Employee';
     const userIdStr = localStorage.getItem('adp_user_id');
+    
+    const storedUser = localStorage.getItem('adp_user_full');
+    if (storedUser && storedUser !== 'undefined') {
+      try {
+        this.employeeData = JSON.parse(storedUser);
+        this.userName = this.employeeData.firstName + ' ' + this.employeeData.lastName;
+        if (!this.userId && this.employeeData.id) this.userId = this.employeeData.id;
+      } catch(e) {}
+    }
+
     if (userIdStr) {
       this.userId = parseInt(userIdStr, 10);
-
-      // Load attendance immediately after userId is set
-      this.loadTodayAttendance();
-
-      this.http.get<any[]>('http://localhost:8085/api/employees').subscribe({
-        next: (employees: any[]) => {
-          const me = employees.find((e: any) => e.id === this.userId);
-          if (me) { this.employeeData = me; this.userName = me.firstName + ' ' + me.lastName; localStorage.setItem('adp_user_full', JSON.stringify(me)); }
-        }
-      });
-
-      // Poll every 30 seconds
-      this.pollInterval = setInterval(() => this.loadTodayAttendance(), 30000);
+      this.loadTodayAttendance(true);
+      this.fetchEmployeeData();
+      this.fetchHistory();
+      this.generateMonthDays();
+      this.pollInterval = setInterval(() => this.loadTodayAttendance(false), 30000);
     }
-    const storedUser = localStorage.getItem('adp_user_full');
-    if (storedUser && storedUser !== 'undefined') this.employeeData = JSON.parse(storedUser);
+  }
+
+  fetchHistory() {
+    if (!this.userId) {
+      console.warn('Cannot fetch history: No User ID found');
+      return;
+    }
+    this.http.get<any[]>(`http://localhost:8085/api/employees/${this.userId}/leaves-history`).subscribe({
+      next: (data) => {
+        this.myLeaves = Array.isArray(data) ? data.sort((a,b) => b.id - a.id) : [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Leaves fetch error:', err);
+        this.notifService.show('Failed to load leave history.', 'error');
+        this.cdr.detectChanges();
+      }
+    });
+    this.http.get<any[]>(`http://localhost:8085/api/employees/${this.userId}/attendance-history`).subscribe({
+      next: (data) => {
+        this.myAttendance = Array.isArray(data) ? data : [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Attendance fetch error:', err);
+        this.notifService.show('Failed to load attendance history.', 'error');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  isWeekend(date: string): boolean {
+    if (!date) return false;
+    const parts = date.split('-').map(Number);
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return d.getDay() === 0 || d.getDay() === 6;
+  }
+
+  generateMonthDays() {
+    this.monthDays = [];
+    const d = new Date(this.navigationDate.getFullYear(), this.navigationDate.getMonth(), 1);
+    
+    // Adjust to start of the week (Monday)
+    let startOffset = d.getDay() - 1;
+    if (startOffset === -1) startOffset = 6; // Sunday
+    d.setDate(d.getDate() - startOffset);
+
+    // Generate 6 weeks (42 days)
+    for (let i = 0; i < 42; i++) {
+        const dateStr = this.formatLocalDate(d);
+        this.monthDays.push({
+            date: dateStr,
+            isCurrentMonth: d.getMonth() === this.navigationDate.getMonth(),
+            isToday: dateStr === new Date().toISOString().split('T')[0]
+        });
+        d.setDate(d.getDate() + 1);
+    }
+  }
+
+  formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  changeMonth(offset: number) {
+    this.navigationDate.setMonth(this.navigationDate.getMonth() + offset);
+    this.generateMonthDays();
+  }
+
+  getDayStats(dateStr: string) {
+    const today = new Date().toISOString().split('T')[0];
+    // Check for leaves first
+    for (const req of this.myLeaves) {
+        if (req.status === 'APPROVED' && dateStr >= req.startDate && dateStr <= req.endDate) {
+            return { status: 'leave', type: req.type };
+        }
+    }
+    
+    // Check attendance
+    for (const att of this.myAttendance) {
+        if (att.workDate === dateStr) {
+            return { status: 'worked' };
+        }
+    }
+    
+    const parts = dateStr.split('-').map(Number);
+    const d = new Date(parts[0], parts[1] - 1, parts[2]); // local date
+    if (d.getDay() === 0 || d.getDay() === 6) return { status: 'weekend' };
+    
+    if (dateStr === today) return { status: 'none' };
+    
+    return dateStr > new Date().toISOString().split('T')[0] ? { status: 'future' } : { status: 'absent' };
+  }
+
+  getDayColor(dateStr: string) {
+    const s = this.getDayStats(dateStr);
+    if (s.status === 'leave') {
+        if (s.type === 'SICK') return '#fee2e2';
+        if (s.type === 'UNPAID') return '#fef3c7'; // Amber for Unpaid
+        return '#dbeafe';
+    }
+    if (s.status === 'worked') return '#dcfce7';
+    if (s.status === 'absent') return '#fef2f2';
+    return 'white';
+  }
+
+  getDayLabel(dateStr: string) {
+    if (this.isWeekend(dateStr)) return ''; 
+    const s = this.getDayStats(dateStr);
+    if (s.status === 'leave') {
+        if (s.type === 'SICK') return '💊';
+        if (s.type === 'UNPAID') return '💼';
+        return '🌴';
+    }
+    if (s.status === 'worked') return '✅';
+    if (s.status === 'absent') return '❌';
+    return '';
+  }
+
+  getDayTitle(dateStr: string) {
+    const s = this.getDayStats(dateStr);
+    if (s.status === 'leave') return `On Leave: ${s.type}`;
+    if (s.status === 'worked') return 'Worked day';
+    if (s.status === 'absent') return 'Absent / No records';
+    return '';
+  }
+
+  fetchEmployeeData() {
+    if (!this.userId) return;
+    this.http.get<any>(`http://localhost:8085/api/employees/${this.userId}/profile`).subscribe({
+      next: (me) => {
+        if (me) {
+          this.employeeData = me;
+          this.userName = me.firstName + ' ' + me.lastName;
+          localStorage.setItem('adp_user_full', JSON.stringify(me));
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('Failed to sync employee data:', err);
+        this.notifService.show('Profile sync failed.', 'error');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -367,12 +638,15 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     clearInterval(this.pollInterval);
   }
 
-  loadTodayAttendance() {
+  loadTodayAttendance(isFirstLoad = false) {
     if (!this.userId) return;
+    if (isFirstLoad) this.loadingAttendance = true;
+    
     this.http.get<any>(`http://localhost:8085/api/employees/${this.userId}/attendance/today`).subscribe({
       next: (data) => {
+        this.loadingAttendance = false;
         if (data) {
-          // Normalize all timestamp fields — backend may return array [y,m,d,h,min,s] or ISO string
+          // Normalize all timestamp fields
           this.today = {
             ...data,
             morningIn:   this.parseTs(data.morningIn),
@@ -385,8 +659,13 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         }
         this.restoreTimer();
         if (this.today?.eveningOut) this.calcTotalWorked();
+        this.cdr.detectChanges(); // Force UI update
       },
-      error: () => this.today = null
+      error: () => { 
+        this.today = null; 
+        this.loadingAttendance = false; 
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -530,7 +809,8 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
 
   submitLeave(event: Event) {
     event.preventDefault();
-    if (!this.userId) return;
+    if (!this.userId || !this.employeeData) return;
+    
     const form = event.target as HTMLFormElement;
     const payload = {
       startDate: (form.elements.namedItem('startDate') as HTMLInputElement).value,
@@ -538,8 +818,40 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
       reason: (form.elements.namedItem('reason') as HTMLTextAreaElement).value,
       type: (form.elements.namedItem('type') as HTMLSelectElement).value
     };
+
+    // Calculate requested days
+    const start = new Date(payload.startDate);
+    const end = new Date(payload.endDate);
+
+    let businessDays = 0;
+    let current = new Date(start);
+    while (current <= end) {
+      const day = current.getDay();
+      if (day !== 0 && day !== 6) { // Skip Sunday (0) and Saturday (6)
+        businessDays++;
+      }
+      current.setDate(current.getDate() + 1);
+    }
+
+    if (businessDays <= 0) {
+      this.notifService.show('Invalid date range selected.', 'error');
+      return;
+    }
+
+    // Check balance
+    const currentBalance = payload.type === 'SICK' ? (this.employeeData.sickLeaveBalance || 0) : (this.employeeData.leaveBalance || 0);
+    
+    if (payload.type !== 'UNPAID' && businessDays > currentBalance) {
+      this.notifService.show(`Insufficient Balance: You are requesting ${businessDays} business days but only have ${currentBalance.toFixed(1)} days available.`, 'error');
+      return;
+    }
+
     this.http.post(`http://localhost:8085/api/employees/${this.userId}/leaves`, payload).subscribe({
-      next: () => { this.notifService.show('Leave request submitted.', 'info'); (event.target as HTMLFormElement).reset(); },
+      next: () => { 
+        this.notifService.show('Leave request submitted.', 'info'); 
+        (event.target as HTMLFormElement).reset(); 
+        this.fetchHistory(); // Refresh history
+      },
       error: () => this.notifService.show('Failed to submit leave.', 'error')
     });
   }

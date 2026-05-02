@@ -1,7 +1,13 @@
 package com.adp.hcm.controller;
 
 import com.adp.hcm.entity.Employee;
+import com.adp.hcm.entity.LeaveRequest;
+import com.adp.hcm.entity.Attendance;
 import com.adp.hcm.service.EmployeeService;
+import com.adp.hcm.service.HRManagementService;
+import com.adp.hcm.repository.EmployeeRepository;
+import com.adp.hcm.repository.LeaveRequestRepository;
+import com.adp.hcm.repository.AttendanceRepository;
 import com.adp.hcm.controller.dto.SetupRequest;
 import com.adp.hcm.controller.dto.LoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +28,16 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @Autowired
-    private com.adp.hcm.service.HRManagementService hrService;
+    private HRManagementService hrService;
 
     @Autowired
-    private com.adp.hcm.repository.EmployeeRepository employeeRepository;
+    private EmployeeRepository employeeRepository;
+    
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
+    
+    @Autowired
+    private AttendanceRepository attendanceRepository;
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -50,6 +62,19 @@ public class EmployeeController {
     @GetMapping("/employees")
     public List<Employee> getAllEmployees() {
         return employeeService.getAllEmployees();
+    }
+
+    // Compatibility alias for Admin Dashboard
+    @GetMapping("/employees/{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable("id") Long id) {
+        return getEmployeeProfile(id);
+    }
+
+    @GetMapping("/employees/{id}/profile")
+    public ResponseEntity<Employee> getEmployeeProfile(@PathVariable("id") Long id) {
+        return employeeRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/employees")
@@ -77,14 +102,14 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees/{id}/leaves")
-    public ResponseEntity<?> submitLeave(@PathVariable("id") Long id, @RequestBody com.adp.hcm.entity.LeaveRequest leave) {
+    public ResponseEntity<?> submitLeave(@PathVariable("id") Long id, @RequestBody LeaveRequest leave) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
         return ResponseEntity.ok(hrService.submitLeaveRequest(employee, leave));
     }
 
     @PutMapping("/employees/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable("id") Long id, @RequestBody Employee employee) {
-        return ResponseEntity.ok(employeeService.updateEmployee(id, employee));
+    public ResponseEntity<Employee> updateEmployee(@PathVariable("id") Long id, @RequestBody Map<String, Object> payload) {
+        return ResponseEntity.ok(employeeService.updateEmployeeFromMap(id, payload));
     }
 
     @PostMapping("/employees/{id}/attendance")
@@ -96,5 +121,15 @@ public class EmployeeController {
     @GetMapping("/employees/{id}/attendance/today")
     public ResponseEntity<?> getTodayAttendance(@PathVariable("id") Long id) {
         return ResponseEntity.ok(hrService.getTodayAttendance(id));
+    }
+
+    @GetMapping("/employees/{id}/leaves-history")
+    public List<LeaveRequest> getEmployeeLeaves(@PathVariable("id") Long id) {
+        return leaveRequestRepository.findByEmployeeId(id);
+    }
+
+    @GetMapping("/employees/{id}/attendance-history")
+    public List<Attendance> getEmployeeAttendance(@PathVariable("id") Long id) {
+        return attendanceRepository.findByEmployeeId(id);
     }
 }

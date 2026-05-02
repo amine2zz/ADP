@@ -21,10 +21,10 @@ import { FormsModule } from '@angular/forms';
       </div>
 
       <!-- Tabs -->
-      <div class="card" style="padding: 0 1.5rem; margin-bottom: 1.5rem;">
-        <div class="tabs">
-          <button class="tab-btn" [class.active]="currentTab==='roster'" (click)="currentTab='roster'">Employee Roster</button>
-          <button class="tab-btn" [class.active]="currentTab==='history'" (click)="currentTab='history'">Audit Trail</button>
+      <div class="card" style="padding: 1rem; margin-top: 1rem; margin-bottom: 1.5rem;">
+        <div class="tabs" style="display: flex; gap: 2rem; border-bottom: 1px solid var(--adp-border);">
+          <button (click)="currentTab = 'roster'" [style.border-bottom]="currentTab === 'roster' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600; color: var(--adp-charcoal);">Employee Roster</button>
+          <button (click)="currentTab = 'history'" [style.border-bottom]="currentTab === 'history' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600; color: var(--adp-charcoal);">Change History</button>
         </div>
       </div>
 
@@ -101,6 +101,7 @@ import { FormsModule } from '@angular/forms';
                   <th>Department</th>
                   <th>Reports To</th>
                   <th>Status</th>
+                  <th>Balances</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -125,6 +126,12 @@ import { FormsModule } from '@angular/forms';
                     <ng-template #noManager><span class="no-manager">— None —</span></ng-template>
                   </td>
                   <td><span class="status-badge" [ngClass]="(emp.status||'unknown').toLowerCase()">{{ (emp.status||'Unknown').replace('_',' ') }}</span></td>
+                  <td>
+                    <div class="balance-cell">
+                      <div title="Annual Leave">📅 {{ emp.leaveBalance?.toFixed(1) || '0.0' }}d</div>
+                      <div title="Sick Leave" style="color:#ef4444">💊 {{ emp.sickLeaveBalance?.toFixed(1) || '0.0' }}d</div>
+                    </div>
+                  </td>
                   <td>
                     <button class="btn-edit" (click)="openEdit(emp)">Edit</button>
                   </td>
@@ -241,6 +248,24 @@ import { FormsModule } from '@angular/forms';
               </div>
             </div>
 
+
+            <div class="modal-section-label" style="display:flex; justify-content:space-between; align-items:center;">
+              Leave Bank (Days)
+              <button type="button" class="btn-secondary" style="font-size:0.65rem; padding:0.1rem 0.4rem;" (click)="syncWithPolicy()">🔄 Sync with Policy</button>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group"><label>Category Policy</label>
+                <select name="categoryId">
+                  <option value="">— Unassigned —</option>
+                  <option *ngFor="let cat of categories" [value]="cat.id" [selected]="selectedEmployee.category?.id === cat.id">{{ cat.name }} ({{ cat.annualLeaveAllowance }}d/y)</option>
+                </select>
+              </div>
+              <div class="form-row-2" style="gap:0.5rem;">
+                <div class="form-group"><label>Annual Bal.</label><input type="number" step="0.1" name="leaveBalance" [value]="selectedEmployee.leaveBalance||0"></div>
+                <div class="form-group"><label>Sick Bal.</label><input type="number" step="0.1" name="sickLeaveBalance" [value]="selectedEmployee.sickLeaveBalance||0"></div>
+              </div>
+            </div>
+
             <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
               <button type="submit" class="btn-primary" style="flex:1">Save Changes</button>
               <button type="button" class="btn-secondary" style="flex:1" (click)="selectedEmployee = null">Cancel</button>
@@ -304,6 +329,8 @@ import { FormsModule } from '@angular/forms';
     /* Edit button */
     .btn-edit { padding: 0.3rem 0.8rem; background: #eff6ff; color: #1967D2; border: 1.5px solid #bfdbfe; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
     .btn-edit:hover { background: #1967D2; color: white; }
+    
+    .balance-cell { display: flex; flex-direction: column; gap: 2px; font-size: 0.75rem; font-weight: 600; }
 
     /* Modal */
     .modal-section-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--adp-dark-gray); padding-bottom: 0.25rem; border-bottom: 1px solid var(--adp-border); }
@@ -314,6 +341,7 @@ export class EmployeeComponent implements OnInit {
   employees: any[] = [];
   departments: any[] = [];
   managers: any[] = [];
+  categories: any[] = [];
   history: any[] = [];
   currentTab: string = 'roster';
   selectedEmployee: any = null;
@@ -347,6 +375,7 @@ export class EmployeeComponent implements OnInit {
     this.http.get<any[]>('http://localhost:8085/api/employees').subscribe(d => this.employees = d);
     this.http.get<any[]>('http://localhost:8085/api/departments').subscribe(d => this.departments = d);
     this.http.get<any[]>('http://localhost:8085/api/employees/managers').subscribe(d => this.managers = d);
+    this.http.get<any[]>('http://localhost:8085/api/hr/categories').subscribe(d => this.categories = d);
     this.http.get<any[]>('http://localhost:8085/api/hr/history').subscribe(d => this.history = d);
   }
 
@@ -371,6 +400,26 @@ export class EmployeeComponent implements OnInit {
     });
   }
 
+  syncWithPolicy() {
+    if (!this.selectedEmployee || !this.selectedEmployee.category?.id) {
+      // Find category details from the local list if not already expanded
+      const catId = (document.getElementsByName('categoryId')[0] as HTMLSelectElement).value;
+      const cat = this.categories.find(c => c.id == catId);
+      if (cat && this.selectedEmployee) {
+        this.selectedEmployee.leaveBalance = cat.annualLeaveAllowance;
+        this.selectedEmployee.sickLeaveBalance = cat.sickLeaveAllowance;
+        this.notifService.show(`Recalibrated to ${cat.name} standards.`, 'success');
+      } else {
+        this.notifService.show('Please select a Category first.', 'info');
+      }
+    } else {
+      const cat = this.selectedEmployee.category;
+      this.selectedEmployee.leaveBalance = cat.annualLeaveAllowance;
+      this.selectedEmployee.sickLeaveBalance = cat.sickLeaveAllowance;
+      this.notifService.show(`Recalibrated to ${cat.name} standards.`, 'success');
+    }
+  }
+
   updateEmployee(event: Event) {
     event.preventDefault();
     if (!this.selectedEmployee) return;
@@ -391,7 +440,10 @@ export class EmployeeComponent implements OnInit {
       role: (form.elements.namedItem('role') as HTMLSelectElement).value,
       status: (form.elements.namedItem('status') as HTMLSelectElement).value,
       department: deptId ? { id: Number(deptId) } : null,
-      manager: managerId ? { id: Number(managerId) } : null
+      manager: managerId ? { id: Number(managerId) } : null,
+      categoryId: (form.elements.namedItem('categoryId') as HTMLSelectElement).value,
+      leaveBalance: (form.elements.namedItem('leaveBalance') as HTMLInputElement).value,
+      sickLeaveBalance: (form.elements.namedItem('sickLeaveBalance') as HTMLInputElement).value
     };
     this.http.put(`http://localhost:8085/api/employees/${this.selectedEmployee.id}`, payload).subscribe({
       next: () => { this.selectedEmployee = null; this.notifService.show('Profile updated successfully', 'success'); this.refreshData(); },

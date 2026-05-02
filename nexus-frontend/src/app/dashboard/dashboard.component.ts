@@ -1,11 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+
+@Pipe({ name: 'mapDepts', standalone: true })
+export class MapDeptsPipe implements PipeTransform {
+  transform(employees: any[]): string[] {
+    if (!employees) return [];
+    return Array.from(new Set(employees.filter(e => e.department?.name).map(e => e.department.name)));
+  }
+}
+
+@Pipe({ name: 'keyValues', standalone: true })
+export class KeyValuesPipe implements PipeTransform {
+  transform(value: any): any[] {
+    if (!value) return [];
+    return Object.entries(value).map(([key, val]) => ({ key, val }));
+  }
+}
 
 @Component({
   selector: 'app-main-dashboard',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, FormsModule, MapDeptsPipe, KeyValuesPipe],
   template: `
     <div class="dashboard-wrapper">
       <div class="dash-welcome">
@@ -14,16 +31,16 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
             <h2>Dashboard Overview</h2>
             <p>Monitor real-time metrics, employee statistics, and platform health.</p>
           </div>
-          <button class="btn-primary" (click)="fetchMetrics()" style="font-size: 0.8rem; padding: 0.5rem 1rem;">Force Sync</button>
         </div>
       </div>
 
       <!-- Tab Switcher -->
       <div class="card" style="padding: 1rem; margin-top: 1rem;">
         <div class="tabs" style="display: flex; gap: 2rem; border-bottom: 1px solid var(--adp-border);">
-          <button (click)="currentTab = 'overview'" [style.border-bottom]="currentTab === 'overview' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">System Overview</button>
-          <button (click)="currentTab = 'leaves'" [style.border-bottom]="currentTab === 'leaves' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Leaves</button>
-          <button (click)="currentTab = 'attendance'" [style.border-bottom]="currentTab === 'attendance' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Attendance</button>
+          <button (click)="setTab('overview')" [style.border-bottom]="currentTab === 'overview' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">System Overview</button>
+          <button (click)="setTab('leaves')" [style.border-bottom]="currentTab === 'leaves' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Leaves</button>
+          <button (click)="setTab('attendance')" [style.border-bottom]="currentTab === 'attendance' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Attendance</button>
+          <button (click)="setTab('policies')" [style.border-bottom]="currentTab === 'policies' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Leave Policies</button>
         </div>
       </div>
 
@@ -49,36 +66,52 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
               <div class="kpi-trend negative">Awaiting Activation</div>
             </div>
             <div class="kpi-card" style="border-top: 4px solid #1967D2;">
-              <div class="kpi-title">Departments</div>
-              <div class="kpi-value">{{ metrics?.totalDepartments || 4 }}</div>
-              <div class="kpi-trend">Fully Mapped</div>
+              <div class="kpi-title">Total Leave Bank</div>
+              <div class="kpi-value">📅 {{ metrics?.totalLeaveDays?.toFixed(0) || 0 }}d</div>
+              <div class="kpi-trend positive">Annual Company Total</div>
+            </div>
+            <div class="kpi-card" style="border-top: 4px solid #9c27b0;">
+              <div class="kpi-title">Defined Policies</div>
+              <div class="kpi-value">{{ metrics?.totalPolicies || 0 }}</div>
+              <div class="kpi-trend">Leave Categories</div>
             </div>
           </div>
 
           <div class="charts-section" style="margin-top: 2rem;">
+            <!-- Dynamic Chart 1: Department Distribution -->
             <div class="chart-card">
-              <h3>Employee Growth (2026)</h3>
-              <div class="mock-chart">
-                <div class="bar" style="height: 40%;" title="Jan"></div>
-                <div class="bar" style="height: 55%;" title="Feb"></div>
-                <div class="bar" style="height: 50%;" title="Mar"></div>
-                <div class="bar" style="height: 70%;" title="Apr"></div>
-                <div class="bar" style="height: 65%;" title="May"></div>
-                <div class="bar" style="height: 85%;" title="Jun"></div>
-                <div class="bar" style="height: 95%; background-color: var(--adp-red);" title="Jul"></div>
-              </div>
-              <div class="chart-labels">
-                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span style="font-weight: bold; color: var(--adp-red);">Jul</span>
+              <h3>Department Composition</h3>
+              <div class="composition-list">
+                <div *ngFor="let d of metrics?.deptDistribution | keyValues" class="comp-item">
+                  <div class="comp-info">
+                    <span class="comp-name">{{ d.key }}</span>
+                    <span class="comp-count">{{ d.val }} headcounts</span>
+                  </div>
+                  <div class="comp-bar-bg">
+                    <div class="comp-bar-fill" [style.width.%]="(d.val / metrics.totalHeadcount) * 100"></div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="chart-card list-card">
-              <h3>Recent HR Operations</h3>
-              <ul class="activity-feed">
-                <li><div class="activity-icon bg-green">✓</div><div class="activity-text"><strong>System Link</strong> dynamically activated.<br><small>Just Now</small></div></li>
-                <li><div class="activity-icon bg-blue">👤</div><div class="activity-text"><strong>Java API</strong> integrated flawlessly.<br><small>Mapping Configured</small></div></li>
-                <li><div class="activity-icon bg-red">!</div><div class="activity-text">Database Synchronization completed.<br><small>All connections live.</small></div></li>
-              </ul>
+            <!-- Dynamic Chart 2: Leave Type Trends -->
+            <div class="chart-card">
+              <h3>Leave Request Analysis</h3>
+              <div class="mock-chart">
+                <div *ngFor="let l of metrics?.leaveTypeDistribution | keyValues" 
+                     class="bar-wrap" 
+                     [title]="l.key + ': ' + l.val">
+                  <div class="bar" 
+                       [style.height.%]="(l.val / 10) * 100" 
+                       [class.bg-red]="l.key === 'SICK'"
+                       [class.bg-blue]="l.key === 'ANNUAL'"></div>
+                  <span class="bar-label">{{ l.key.charAt(0) }}{{ l.key.substring(1,3).toLowerCase() }}</span>
+                </div>
+              </div>
+              <div class="chart-legend" style="margin-top: 1rem; display: flex; gap: 1rem; font-size: 0.75rem;">
+                <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; background:#1967D2; border-radius:2px;"></span> Annual</span>
+                <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; background:#D0271D; border-radius:2px;"></span> Sick</span>
+              </div>
             </div>
           </div>
         </div>
@@ -86,12 +119,21 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
         <!-- Tab 2: Global Leaves -->
         <div *ngIf="currentTab === 'leaves'" class="fade-in">
           <div class="card table-card">
-            <h3 style="margin-bottom: 1.5rem; color: var(--adp-charcoal);">Global Leave Management</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h3 style="color: var(--adp-charcoal);">Global Leave Management</h3>
+              <div style="display: flex; gap: 0.75rem;">
+                <input type="text" [(ngModel)]="leaveSearch" placeholder="Search employee..." style="padding: 0.4rem 0.75rem; border: 1.5px solid var(--adp-border); border-radius: 6px; font-size: 0.85rem;">
+                <select [(ngModel)]="leaveDeptFilter" style="padding: 0.4rem 0.75rem; border: 1.5px solid var(--adp-border); border-radius: 6px; font-size: 0.85rem;">
+                  <option value="">All Departments</option>
+                  <option *ngFor="let d of allEmployees | mapDepts" [value]="d">{{ d }}</option>
+                </select>
+              </div>
+            </div>
             <div class="table-container">
                <table class="adp-table" *ngIf="leaves.length > 0; else noLeaves">
                  <thead><tr><th>Employee</th><th>Department</th><th>Type</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead>
                  <tbody>
-                   <tr *ngFor="let leave of leaves">
+                   <tr *ngFor="let leave of filteredLeaves">
                      <td><strong>{{ leave.employee?.firstName }} {{ leave.employee?.lastName }}</strong></td>
                      <td>{{ leave.employee?.department?.name || 'N/A' }}</td>
                      <td>{{ leave.type }}</td>
@@ -112,8 +154,18 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
         <!-- Tab 3: Global Attendance -->
         <div *ngIf="currentTab === 'attendance'" class="fade-in">
           <div class="card table-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
               <h3 style="color: var(--adp-charcoal);">Global Availability Calendar</h3>
+              <div style="display: flex; gap: 0.75rem;">
+                <input type="text" [(ngModel)]="attSearch" placeholder="Search employee..." style="padding: 0.4rem 0.75rem; border: 1.5px solid var(--adp-border); border-radius: 6px; font-size: 0.85rem;">
+                <select [(ngModel)]="attDeptFilter" style="padding: 0.4rem 0.75rem; border: 1.5px solid var(--adp-border); border-radius: 6px; font-size: 0.85rem;">
+                  <option value="">All Departments</option>
+                  <option *ngFor="let d of allEmployees | mapDepts" [value]="d">{{ d }}</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <div></div>
               <div style="display: flex; gap: 0.5rem; align-items: center;">
                  <button class="btn-primary" style="padding: 0.3rem 0.6rem; background: #5f6368;" (click)="changeWeek(-1)">← Previous</button>
                  <span style="font-weight: 600; font-size: 0.9rem;">Week of {{ weekDays[0]?.date }}</span>
@@ -123,20 +175,99 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
             <p style="color: var(--adp-dark-gray); font-size: 0.9rem; margin-bottom: 1rem;">View schedule: <span style="color:#137333">■ Worked</span> | <span style="color:#1967D2">■ Leave</span> | <span style="color:#80868B">■ Rest Day</span></p>
             
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-               <div *ngFor="let emp of allEmployees" style="display: flex; flex-direction: column; border-bottom: 1px solid var(--adp-border); padding-bottom: 0.5rem;">
-                  <div style="font-weight: 600; margin-bottom: 0.5rem;">{{ emp.firstName }} {{ emp.lastName }} <span style="font-size:0.75rem; color:gray; font-weight:normal;">({{ emp.department?.name || 'No Dept' }})</span></div>
+               <!-- Week Headers -->
+               <div style="display: flex; gap: 0.5rem; margin-left: 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--adp-border);">
+                 <div style="min-width: 150px; font-weight: 800; color: var(--adp-dark-gray); font-size: 0.75rem; text-transform: uppercase;">Employee</div>
+                 <div *ngFor="let dayName of ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" 
+                      style="min-width: 80px; text-align: center; font-weight: 800; color: var(--adp-dark-gray); font-size: 0.75rem; text-transform: uppercase;">
+                   {{ dayName }}
+                 </div>
+               </div>
+
+               <div *ngFor="let emp of filteredEmployees" style="display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--adp-border); padding: 0.5rem 0;">
+                  <div style="min-width: 150px; font-weight: 600; font-size: 0.85rem;">
+                    {{ emp.firstName }} {{ emp.lastName }} 
+                    <div style="font-size:0.65rem; color:gray; font-weight:normal;">{{ emp.department?.name || 'No Dept' }}</div>
+                  </div>
                   <div style="display: flex; gap: 0.5rem; overflow-x: auto;">
                     <div *ngFor="let day of weekDays" 
-                         style="min-width: 80px; height: 50px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: bold; padding: 2px"
-                         [style.background]="getDayColor(emp.id, day.date)"
-                         [style.color]="'white'"
+                         style="min-width: 80px; height: 44px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800; padding: 2px; transition: transform 0.1s;"
+                         [style.background]="day.isWeekend ? '#f1f5f9' : getDayColor(emp.id, day.date)"
+                         [style.color]="day.isWeekend ? '#64748b' : 'white'"
+                         [style.border]="day.isWeekend ? '1px dashed var(--adp-border)' : 'none'"
                          [title]="getDayTitle(emp.id, day.date)">
-                      <div>{{ day.name }}</div>
-                      <div>{{ day.date.split('-')[2] }}/{{ day.date.split('-')[1] }}</div>
-                      <div style="font-size: 0.6rem; margin-top: 2px;">{{ getDayLabel(emp.id, day.date) }}</div>
+                      <div style="opacity: 0.8;">{{ day.date.split('-')[2] }}/{{ day.date.split('-')[1] }}</div>
+                      <div style="font-size: 0.65rem; margin-top: 1px;">{{ getDayLabel(emp.id, day.date) }}</div>
                     </div>
                   </div>
                </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Leave Policies -->
+        <div *ngIf="currentTab === 'policies'" class="fade-in" style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+          <!-- Form Card -->
+          <div class="card">
+            <h3 style="margin-bottom: 1.25rem;">{{ selectedCategory ? 'Edit Policy' : 'New Leave Policy' }}</h3>
+            <form (submit)="saveCategory($event)" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Policy Name</label>
+                <input type="text" name="name" [(ngModel)]="policyForm.name" placeholder="Category 1" required style="padding: 0.5rem; border: 1.5px solid var(--adp-border); border-radius: 6px;">
+              </div>
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Annual Allowance (Days)</label>
+                <input type="number" name="annualAllowance" [(ngModel)]="policyForm.annualLeaveAllowance" (input)="onAnnualChange()" (change)="onAnnualChange()" placeholder="20" required style="padding: 0.5rem; border: 1.5px solid var(--adp-border); border-radius: 6px;">
+              </div>
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Sick Leave Allowance (Days)</label>
+                <input type="number" name="sickAllowance" [(ngModel)]="policyForm.sickLeaveAllowance" placeholder="10" required style="padding: 0.5rem; border: 1.5px solid var(--adp-border); border-radius: 6px;">
+              </div>
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Monthly Accrual Rate</label>
+                <div style="padding: 0.5rem; border: 1.5px solid var(--adp-border); border-radius: 6px; background: #f1f5f9; color: #0f172a; font-weight: 700; min-height: 38px; display: flex; align-items: center; justify-content: space-between;">
+                  <span>📅 Monthly Increment:</span>
+                  <span style="color: #1967D2;">+{{ policyForm.monthlyIncrement || '0.00' }} days</span>
+                </div>
+                <input type="hidden" name="monthlyIncrement" [(ngModel)]="policyForm.monthlyIncrement">
+              </div>
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Description</label>
+                <input type="text" name="description" [(ngModel)]="policyForm.description" placeholder="Details..." style="padding: 0.5rem; border: 1.5px solid var(--adp-border); border-radius: 6px;">
+              </div>
+              <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                <button type="submit" class="btn-primary" style="flex:1">{{ selectedCategory ? 'Update' : 'Save' }} Policy</button>
+                <button *ngIf="selectedCategory" type="button" class="btn-primary" style="flex:1; background:#64748b" (click)="resetPolicyForm()">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- List Card -->
+          <div class="card table-card">
+            <h3 style="margin-bottom: 1.25rem;">Defined Policies</h3>
+            <div class="table-container">
+              <table class="adp-table">
+                <thead><tr><th>Policy Name</th><th>Entitlements</th><th>Accrual</th><th>Actions</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let cat of categories">
+                    <td>
+                      <strong>{{ cat.name }}</strong>
+                      <div style="font-size:0.75rem; color:#64748b;">{{ cat.description }}</div>
+                    </td>
+                    <td>
+                      <div style="font-weight:600;">📅 {{ cat.annualLeaveAllowance }}d Annual</div>
+                      <div style="color:#ef4444; font-size:0.8rem; font-weight:600;">💊 {{ cat.sickLeaveAllowance }}d Sick</div>
+                    </td>
+                    <td>+{{ cat.monthlyIncrement?.toFixed(2) }}d/mo</td>
+                    <td>
+                      <div style="display:flex; gap:0.4rem;">
+                        <button (click)="editPolicy(cat)" style="padding: 0.2rem 0.5rem; background: #eff6ff; color: #1967D2; border: 1px solid #bfdbfe; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">Edit</button>
+                        <button (click)="deleteCategory(cat.id)" style="padding: 0.2rem 0.5rem; background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">Del</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -157,9 +288,17 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
     .charts-section { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
     .chart-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .chart-card h3 { font-size: 1.1rem; color: var(--adp-charcoal); margin-bottom: 1.5rem; }
-    .mock-chart { height: 250px; display: flex; align-items: flex-end; gap: 5%; border-bottom: 2px solid var(--adp-light-gray); padding-bottom: 5px; }
-    .bar { flex: 1; background-color: var(--adp-dark-gray); border-radius: 4px 4px 0 0; }
-    .chart-labels { display: flex; justify-content: space-between; margin-top: 1rem; color: var(--adp-dark-gray); font-size: 0.85rem; }
+    .mock-chart { height: 200px; display: flex; align-items: flex-end; gap: 10%; border-bottom: 2px solid var(--adp-light-gray); padding-bottom: 5px; }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+    .bar { width: 100%; background-color: var(--adp-blue); border-radius: 4px 4px 0 0; transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .bar-label { font-size: 0.7rem; color: var(--adp-dark-gray); margin-top: 0.5rem; font-weight: 600; }
+    .composition-list { display: flex; flex-direction: column; gap: 1.25rem; }
+    .comp-item { display: flex; flex-direction: column; gap: 0.4rem; }
+    .comp-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; }
+    .comp-name { color: var(--adp-charcoal); }
+    .comp-count { color: var(--adp-dark-gray); font-size: 0.75rem; }
+    .comp-bar-bg { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .comp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--adp-red), #ff6b6b); border-radius: 4px; transition: width 1s ease-out; }
     .activity-feed { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;}
     .activity-feed li { display: flex; gap: 0.5rem; align-items: center; }
     .activity-icon { width: 24px; height: 24px; border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 12px; }
@@ -182,15 +321,32 @@ export class MainDashboardComponent implements OnInit {
   leaves: any[] = [];
   attendanceData: any[] = [];
   allEmployees: any[] = [];
+  leaveSearch: string = '';
+  leaveDeptFilter: string = '';
+  attSearch: string = '';
+  attDeptFilter: string = '';
+  categories: any[] = [];
+  selectedCategory: any = null;
+  policyForm: any = { name: '', annualLeaveAllowance: null, monthlyIncrement: null, description: '' };
   weekDays: any[] = [];
   navigationDate: Date = new Date();
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
+    const savedTab = localStorage.getItem('adp_dash_tab');
+    if (savedTab) this.currentTab = savedTab;
+
     this.generateWeekDays();
     this.fetchMetrics();
     this.fetchData();
+  }
+
+  setTab(tab: string) {
+    this.currentTab = tab;
+    localStorage.setItem('adp_dash_tab', tab);
+    // Automatically refresh data whenever switching tabs
+    this.fetchMetrics();
   }
 
   generateWeekDays() {
@@ -200,12 +356,27 @@ export class MainDashboardComponent implements OnInit {
       for (let i = 0; i < 7; i++) {
           const d = new Date(startOfWeek);
           d.setDate(startOfWeek.getDate() + i);
+          const dateStr = this.formatLocalDate(d);
           this.weekDays.push({
               name: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()],
-              date: d.toISOString().split('T')[0],
+              date: dateStr,
               isWeekend: d.getDay() === 0 || d.getDay() === 6
           });
       }
+  }
+
+  formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  isWeekend(dateStr: string): boolean {
+    if (!dateStr) return false;
+    const parts = dateStr.split('-').map(Number);
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return d.getDay() === 0 || d.getDay() === 6;
   }
 
   changeWeek(offset: number) {
@@ -224,6 +395,10 @@ export class MainDashboardComponent implements OnInit {
     });
     this.http.get<any[]>('http://localhost:8085/api/hr/all-attendance').subscribe({
         next: (data) => this.attendanceData = data,
+        error: (err) => console.error(err)
+    });
+    this.http.get<any[]>('http://localhost:8085/api/hr/categories').subscribe({
+        next: (data) => this.categories = data,
         error: (err) => console.error(err)
     });
   }
@@ -261,7 +436,11 @@ export class MainDashboardComponent implements OnInit {
 
   getDayColor(empId: number, dateStr: string) {
       const s = this.getDayStats(empId, dateStr);
-      if (s.status === 'leave') return '#1967D2';
+      if (s.status === 'leave') {
+          if (s.type === 'SICK') return '#ef4444';
+          if (s.type === 'UNPAID') return '#f59e0b'; // Amber for Unpaid
+          return '#1967D2';
+      }
       if (s.status === 'weekend') return '#80868B';
       if (s.status === 'worked') return '#137333';
       if (s.status === 'future') return '#E8EAED';
@@ -269,9 +448,12 @@ export class MainDashboardComponent implements OnInit {
   }
 
   getDayLabel(empId: number, dateStr: string) {
+      if (this.isWeekend(dateStr)) return '';
       const s = this.getDayStats(empId, dateStr);
-      if (s.status === 'leave') return s.type;
-      if (s.status === 'weekend') return 'Rest Day';
+      if (s.status === 'leave') {
+          if (s.type === 'UNPAID') return 'UNPAID 💼';
+          return s.type;
+      }
       if (s.status === 'worked') return `${s.hrs}h ${s.mins}m`;
       if (s.status === 'future') return '-';
       return '0h 0m';
@@ -297,5 +479,68 @@ export class MainDashboardComponent implements OnInit {
       error: (err) => console.error('Metrics sync failed', err)
     });
     this.fetchData();
+  }
+
+  get filteredLeaves() {
+    return this.leaves.filter(l => {
+      const matchSearch = !this.leaveSearch || `${l.employee?.firstName} ${l.employee?.lastName}`.toLowerCase().includes(this.leaveSearch.toLowerCase());
+      const matchDept = !this.leaveDeptFilter || l.employee?.department?.name === this.leaveDeptFilter;
+      return matchSearch && matchDept;
+    });
+  }
+
+  get filteredEmployees() {
+    return this.allEmployees.filter(e => {
+      const matchSearch = !this.attSearch || `${e.firstName} ${e.lastName}`.toLowerCase().includes(this.attSearch.toLowerCase());
+      const matchDept = !this.attDeptFilter || e.department?.name === this.attDeptFilter;
+      return matchSearch && matchDept;
+    });
+  }
+
+  saveCategory(event: Event) {
+    event.preventDefault();
+    // Force recalculation before saving to be absolutely sure
+    this.onAnnualChange();
+    
+    if (this.selectedCategory) {
+      this.http.put(`http://localhost:8085/api/hr/categories/${this.selectedCategory.id}`, this.policyForm).subscribe({
+        next: () => { this.resetPolicyForm(); this.fetchMetrics(); this.fetchData(); },
+        error: (err) => console.error(err)
+      });
+    } else {
+      this.http.post('http://localhost:8085/api/hr/categories', this.policyForm).subscribe({
+        next: () => { this.resetPolicyForm(); this.fetchMetrics(); this.fetchData(); },
+        error: (err) => console.error(err)
+      });
+    }
+  }
+
+  onAnnualChange() {
+    const annual = Number(this.policyForm.annualLeaveAllowance);
+    if (annual > 0) {
+      // Strictly enforce Annual / 12
+      this.policyForm.monthlyIncrement = Number((annual / 12).toFixed(2));
+    } else {
+      this.policyForm.monthlyIncrement = 0;
+    }
+  }
+
+  editPolicy(cat: any) {
+    this.selectedCategory = cat;
+    this.policyForm = { ...cat };
+  }
+
+  resetPolicyForm() {
+    this.selectedCategory = null;
+    this.policyForm = { name: '', annualLeaveAllowance: null, monthlyIncrement: null, description: '' };
+  }
+
+  deleteCategory(id: number) {
+    if (confirm('Delete this policy?')) {
+      this.http.delete(`http://localhost:8085/api/hr/categories/${id}`).subscribe({
+        next: () => { this.fetchMetrics(); this.fetchData(); },
+        error: (err) => console.error(err)
+      });
+    }
   }
 }

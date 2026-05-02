@@ -25,6 +25,12 @@ public class EmployeeService {
     @Autowired
     private HRManagementService hrService;
 
+    @Autowired
+    private com.adp.hcm.repository.DepartmentRepository departmentRepository;
+
+    @Autowired
+    private com.adp.hcm.repository.EmployeeCategoryRepository categoryRepository;
+
     public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
     }
@@ -41,6 +47,12 @@ public class EmployeeService {
         String token = UUID.randomUUID().toString();
         employee.setActivationToken(token);
         employee.setStatus("PENDING_SETUP");
+        
+        // Initialize balances from category if present
+        if (employee.getCategory() != null) {
+            employee.setLeaveBalance((double)employee.getCategory().getAnnualLeaveAllowance());
+            employee.setSickLeaveBalance((double)employee.getCategory().getSickLeaveAllowance());
+        }
         
         Employee savedEmployee = employeeRepository.save(employee);
         
@@ -98,6 +110,90 @@ public class EmployeeService {
         }
         
         return employeeRepository.save(employee);
+    }
+
+    public Employee updateEmployeeFromMap(Long id, java.util.Map<String, Object> updates) {
+        try {
+            Employee existing = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
+            
+            if (updates.containsKey("firstName")) existing.setFirstName((String) updates.get("firstName"));
+            if (updates.containsKey("lastName")) existing.setLastName((String) updates.get("lastName"));
+            
+            String cin = (String) updates.get("cin");
+            existing.setCin((cin == null || cin.trim().isEmpty()) ? null : cin);
+            
+            String employeeCode = (String) updates.get("employeeCode");
+            existing.setEmployeeCode((employeeCode == null || employeeCode.trim().isEmpty()) ? null : employeeCode);
+            
+            if (updates.containsKey("gender")) existing.setGender((String) updates.get("gender"));
+            if (updates.containsKey("maritalStatus")) existing.setMaritalStatus((String) updates.get("maritalStatus"));
+            if (updates.containsKey("nationality")) existing.setNationality((String) updates.get("nationality"));
+            if (updates.containsKey("emergencyContact")) existing.setEmergencyContact((String) updates.get("emergencyContact"));
+            if (updates.containsKey("jobTitle")) existing.setJobTitle((String) updates.get("jobTitle"));
+            if (updates.containsKey("joiningDate")) existing.setJoiningDate((String) updates.get("joiningDate"));
+            if (updates.containsKey("address")) existing.setAddress((String) updates.get("address"));
+            if (updates.containsKey("phoneNumber")) existing.setPhoneNumber((String) updates.get("phoneNumber"));
+            if (updates.containsKey("dateOfBirth")) existing.setDateOfBirth((String) updates.get("dateOfBirth"));
+            if (updates.containsKey("role")) existing.setRole((String) updates.get("role"));
+            if (updates.containsKey("status")) existing.setStatus((String) updates.get("status"));
+            
+            if (updates.containsKey("leaveBalance")) existing.setLeaveBalance(Double.valueOf(updates.get("leaveBalance").toString()));
+            if (updates.containsKey("sickLeaveBalance")) existing.setSickLeaveBalance(Double.valueOf(updates.get("sickLeaveBalance").toString()));
+
+            if (updates.containsKey("categoryId")) {
+                Object catIdObj = updates.get("categoryId");
+                if (catIdObj != null && !catIdObj.toString().isEmpty()) {
+                    Long catId = Long.valueOf(catIdObj.toString());
+                    categoryRepository.findById(catId).ifPresent(cat -> {
+                        existing.setCategory(cat);
+                        // Auto-initialize balance if it's currently zero or null
+                        if (existing.getLeaveBalance() == null || existing.getLeaveBalance() == 0.0) {
+                            existing.setLeaveBalance((double)cat.getAnnualLeaveAllowance());
+                        }
+                        if (existing.getSickLeaveBalance() == null || existing.getSickLeaveBalance() == 0.0) {
+                            existing.setSickLeaveBalance((double)cat.getSickLeaveAllowance());
+                        }
+                    });
+                } else {
+                    existing.setCategory(null);
+                }
+            }
+
+            if (updates.containsKey("syncWithPolicy") && (boolean)updates.get("syncWithPolicy")) {
+                if (existing.getCategory() != null) {
+                    existing.setLeaveBalance((double)existing.getCategory().getAnnualLeaveAllowance());
+                    existing.setSickLeaveBalance((double)existing.getCategory().getSickLeaveAllowance());
+                }
+            }
+            
+            if (updates.containsKey("department")) {
+                java.util.Map<String, Object> deptMap = (java.util.Map<String, Object>) updates.get("department");
+                if (deptMap != null && deptMap.get("id") != null) {
+                    Long deptId = ((Number) deptMap.get("id")).longValue();
+                    departmentRepository.findById(deptId).ifPresent(existing::setDepartment);
+                } else {
+                    existing.setDepartment(null);
+                }
+            }
+            
+            if (updates.containsKey("manager")) {
+                java.util.Map<String, Object> managerMap = (java.util.Map<String, Object>) updates.get("manager");
+                if (managerMap != null && managerMap.get("id") != null) {
+                    Long managerId = ((Number) managerMap.get("id")).longValue();
+                    employeeRepository.findById(managerId).ifPresent(existing::setManager);
+                } else {
+                    existing.setManager(null);
+                }
+            }
+            
+            hrService.logOperation("SYSTEM", "PROFILE_UPDATE", existing.getEmail(), "Profile was successfully updated via HR Admin");
+            
+            return employeeRepository.save(existing);
+        } catch (Exception e) {
+            System.err.println("Error updating employee: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public Employee updateEmployee(Long id, Employee updatedData) {

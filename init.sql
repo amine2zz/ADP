@@ -14,6 +14,20 @@ CREATE TABLE IF NOT EXISTS department (
     manager_id BIGINT
 );
 
+-- 3.5 Create Employee Category table
+CREATE TABLE IF NOT EXISTS employee_category (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    annual_leave_allowance INT,
+    monthly_increment DOUBLE,
+    description VARCHAR(255)
+);
+
+INSERT INTO employee_category (name, annual_leave_allowance, monthly_increment, description) VALUES
+('Category 1', 20, 1.66, 'Standard staff - 20 days per year'),
+('Category 2', 25, 2.08, 'Senior staff - 25 days per year'),
+('Category 3', 30, 2.5, 'Management - 30 days per year');
+
 -- 4. Create the Employee table
 CREATE TABLE IF NOT EXISTS employee (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -32,7 +46,11 @@ CREATE TABLE IF NOT EXISTS employee (
     emergency_contact VARCHAR(150),
     joining_date VARCHAR(50),
     job_title VARCHAR(150),
-    FOREIGN KEY (department_id) REFERENCES department(id)
+    category_id BIGINT,
+    leave_balance DOUBLE DEFAULT 0.0,
+    sick_leave_balance DOUBLE DEFAULT 0.0,
+    FOREIGN KEY (department_id) REFERENCES department(id),
+    FOREIGN KEY (category_id) REFERENCES employee_category(id)
 );
 
 -- 5. Insert placeholder/dummy data
