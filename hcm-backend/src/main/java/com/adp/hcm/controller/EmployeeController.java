@@ -88,8 +88,13 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees/{id}/attendance")
-    public ResponseEntity<?> logAttendance(@PathVariable("id") Long id, @RequestBody Map<String, Boolean> payload) {
+    public ResponseEntity<?> logAttendance(@PathVariable("id") Long id, @RequestBody Map<String, String> payload) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
-        return ResponseEntity.ok(hrService.logAttendance(employee, payload.get("clockIn")));
+        return ResponseEntity.ok(hrService.logAttendance(employee, payload.get("punchType")));
+    }
+
+    @GetMapping("/employees/{id}/attendance/today")
+    public ResponseEntity<?> getTodayAttendance(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(hrService.getTodayAttendance(id));
     }
 }

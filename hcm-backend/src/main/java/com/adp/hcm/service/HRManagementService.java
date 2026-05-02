@@ -10,6 +10,7 @@ import com.adp.hcm.repository.OperationHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -74,18 +75,47 @@ public class HRManagementService {
         return leaveRequestRepository.save(request);
     }
 
-    public Attendance logAttendance(Employee employee, boolean clockIn) {
-        Attendance attendance = new Attendance();
-        attendance.setEmployee(employee);
-        if (clockIn) {
-            attendance.setCheckIn(LocalDateTime.now());
-            attendance.setStatus("ACTIVE_SHIFT");
-            logOperation(employee.getEmail(), "CHECK_IN", "SYSTEM", "Clocked in securely");
-        } else {
-            attendance.setCheckOut(LocalDateTime.now());
-            attendance.setStatus("COMPLETED_SHIFT");
-            logOperation(employee.getEmail(), "CHECK_OUT", "SYSTEM", "Clocked out successfully");
+    public Attendance logAttendance(Employee employee, String punchType) {
+        LocalDate today = LocalDate.now();
+
+        // Find today's record or create a new one
+        Attendance attendance = attendanceRepository
+            .findByEmployeeIdAndWorkDate(employee.getId(), today)
+            .orElseGet(() -> {
+                Attendance a = new Attendance();
+                a.setEmployee(employee);
+                a.setWorkDate(today);
+                return a;
+            });
+
+        switch (punchType) {
+            case "MORNING_IN" -> {
+                attendance.setMorningIn(LocalDateTime.now());
+                attendance.setStatus("MORNING_IN");
+                logOperation(employee.getEmail(), "MORNING_IN", "SYSTEM", "Clocked in for work");
+            }
+            case "LUNCH_OUT" -> {
+                attendance.setLunchOut(LocalDateTime.now());
+                attendance.setStatus("LUNCH_OUT");
+                logOperation(employee.getEmail(), "LUNCH_OUT", "SYSTEM", "Out for lunch");
+            }
+            case "AFTERNOON_IN" -> {
+                attendance.setAfternoonIn(LocalDateTime.now());
+                attendance.setStatus("AFTERNOON_IN");
+                logOperation(employee.getEmail(), "AFTERNOON_IN", "SYSTEM", "Back from lunch");
+            }
+            case "EVENING_OUT" -> {
+                attendance.setEveningOut(LocalDateTime.now());
+                attendance.setStatus("COMPLETED");
+                logOperation(employee.getEmail(), "EVENING_OUT", "SYSTEM", "Clocked out of work");
+            }
         }
         return attendanceRepository.save(attendance);
+    }
+
+    public Attendance getTodayAttendance(Long employeeId) {
+        return attendanceRepository
+            .findByEmployeeIdAndWorkDate(employeeId, LocalDate.now())
+            .orElse(null);
     }
 }
