@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gantt Chart - ADP Nexus HCM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem; }
+
+    .gantt-wrapper {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      padding: 2.5rem;
+      width: 900px;
+    }
+
+    .gantt-header {
+      margin-bottom: 2rem;
+      border-left: 5px solid #D0271D;
+      padding-left: 1rem;
+    }
+
+    .gantt-header h1 {
+      font-size: 1.4rem;
+      color: #1a1a2e;
+      font-weight: 700;
+    }
+
+    .gantt-header p {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.3rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 0.6rem 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #444;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    thead th:first-child {
+      text-align: left;
+      width: 280px;
+    }
+
+    thead th:not(:first-child) {
+      text-align: center;
+      width: 90px;
+      background: #f9f9f9;
+      border-left: 1px solid #eee;
+    }
+
+    tbody tr:nth-child(even) { background: #fafafa; }
+    tbody tr:hover { background: #f0f4ff; }
+
+    tbody td {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.82rem;
+      color: #333;
+      border-bottom: 1px solid #eee;
+    }
+
+    tbody td:first-child {
+      font-weight: 600;
+      padding-left: 0.75rem;
+    }
+
+    tbody td:not(:first-child) {
+      text-align: center;
+      border-left: 1px solid #eee;
+    }
+
+    .bar {
+      display: inline-block;
+      width: 75%;
+      height: 22px;
+      border-radius: 4px;
+      background: #D0271D;
+      opacity: 0.85;
+    }
+
+    .bar.blue  { background: #1967D2; }
+    .bar.green { background: #137333; }
+    .bar.orange{ background: #E65100; }
+    .bar.purple{ background: #6A1B9A; }
+    .bar.teal  { background: #00796B; }
+
+    .phase-label {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: #555;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: #aaa;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="gantt-wrapper">
+    <div class="gantt-header">
+      <h1>Project Gantt Chart — ADP Nexus HCM</h1>
+      <p>Intelligent HR Management System &nbsp;|&nbsp; April 2025 – September 2025 &nbsp;|&nbsp; 6-Month Development Plan</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Task / Deliverable</th>
+          <th>Apr</th>
+          <th>May</th>
+          <th>Jun</th>
+          <th>Jul</th>
+          <th>Aug</th>
+          <th>Sep</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. Project Setup &amp; Architecture</td>
+          <td><div class="bar"></div></td>
+          <td></td><td></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>2. Database Design &amp; Backend Foundation</td>
+          <td><div class="bar"></div></td>
+          <td><div class="bar"></div></td>
+          <td></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>3. Authentication &amp; Role-Based Access</td>
+          <td></td>
+          <td><div class="bar blue"></div></td>
+          <td></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>4. Employee &amp; Department Management</td>
+          <td></td>
+          <td><div class="bar blue"></div></td>
+          <td><div class="bar blue"></div></td>
+          <td></td><td></td><td></td>
+        </tr>
+        <tr>
+          <td>5. Leave &amp; Attendance Management</td>
+          <td></td><td></td>
+          <td><div class="bar green"></div></td>
+          <td><div class="bar green"></div></td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td>6. Manager &amp; HR Admin Dashboards</td>
+          <td></td><td></td><td></td>
+          <td><div class="bar orange"></div></td>
+          <td><div class="bar orange"></div></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>7. AI API Integration &amp; Report Generation</td>
+          <td></td><td></td><td></td><td></td>
+          <td><div class="bar purple"></div></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>8. Testing, Bug Fixes &amp; Optimization</td>
+          <td></td><td></td><td></td><td></td>
+          <td><div class="bar purple"></div></td>
+          <td><div class="bar purple"></div></td>
+        </tr>
+        <tr>
+          <td>9. Documentation &amp; Final Delivery</td>
+          <td></td><td></td><td></td><td></td><td></td>
+          <td><div class="bar teal"></div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#D0271D"></div> Setup & Foundation</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1967D2"></div> Core Features</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#137333"></div> HR Operations</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#E65100"></div> Dashboards</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6A1B9A"></div> AI & Testing</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#00796B"></div> Delivery</div>
+    </div>
+
+    <div class="footer">ADP Nexus HCM &nbsp;|&nbsp; ESPRIT End-of-Studies Project &nbsp;|&nbsp; 2025</div>
+  </div>
+</body>
+</html>

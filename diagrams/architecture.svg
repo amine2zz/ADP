@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="Inter, Segoe UI, sans-serif">
+  <rect width="900" height="560" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-size="17" font-weight="800" fill="#1a1a2e">System Architecture — Nexus HCM</text>
+  <line x1="100" y1="44" x2="800" y2="44" stroke="#D0271D" stroke-width="2"/>
+
+  <!-- Layer 1: Frontend -->
+  <rect x="40" y="70" width="240" height="420" rx="10" fill="#F8F9FA" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="40" y="70" width="240" height="40" rx="10" fill="#1967D2"/>
+  <rect x="40" y="100" width="240" height="10" fill="#1967D2"/>
+  <text x="160" y="96" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Frontend — Angular 19</text>
+
+  <rect x="60" y="130" width="200" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="160" y="153" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">LoginComponent</text>
+
+  <rect x="60" y="178" width="200" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="160" y="201" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">LayoutComponent</text>
+
+  <rect x="60" y="226" width="200" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="160" y="249" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">MainDashboardComponent</text>
+
+  <rect x="60" y="274" width="200" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="160" y="297" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">ManagerDashboardComponent</text>
+
+  <rect x="60" y="322" width="200" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="160" y="345" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">EmployeeDashboardComponent</text>
+
+  <rect x="60" y="370" width="200" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="160" y="393" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">EmployeeComponent</text>
+
+  <rect x="60" y="418" width="200" height="36" rx="6" fill="#dbeafe" stroke="#1967D2"/>
+  <text x="160" y="441" text-anchor="middle" font-size="11" font-weight="600" fill="#1967D2">NotificationService</text>
+
+  <!-- Layer 2: Backend -->
+  <rect x="330" y="70" width="240" height="420" rx="10" fill="#F8F9FA" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="330" y="70" width="240" height="40" rx="10" fill="#137333"/>
+  <rect x="330" y="100" width="240" height="10" fill="#137333"/>
+  <text x="450" y="96" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Backend — Spring Boot 4</text>
+
+  <text x="450" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">CONTROLLER LAYER</text>
+  <rect x="350" y="133" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="151" text-anchor="middle" font-size="10" fill="#1a1a2e">EmployeeController · HRController</text>
+  <rect x="350" y="165" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="183" text-anchor="middle" font-size="10" fill="#1a1a2e">DepartmentController · DashboardController</text>
+
+  <line x1="350" y1="200" x2="550" y2="200" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="450" y="218" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">SERVICE LAYER</text>
+  <rect x="350" y="223" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="241" text-anchor="middle" font-size="10" fill="#1a1a2e">EmployeeService</text>
+  <rect x="350" y="255" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="273" text-anchor="middle" font-size="10" fill="#1a1a2e">HRManagementService</text>
+  <rect x="350" y="287" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="305" text-anchor="middle" font-size="10" fill="#1a1a2e">DepartmentService · EmailService</text>
+
+  <line x1="350" y1="322" x2="550" y2="322" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="450" y="340" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">REPOSITORY LAYER</text>
+  <rect x="350" y="345" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="363" text-anchor="middle" font-size="10" fill="#1a1a2e">EmployeeRepository · AttendanceRepository</text>
+  <rect x="350" y="377" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="395" text-anchor="middle" font-size="10" fill="#1a1a2e">LeaveRequestRepository</text>
+  <rect x="350" y="409" width="200" height="28" rx="5" fill="#fff" stroke="#E2E8F0"/>
+  <text x="450" y="427" text-anchor="middle" font-size="10" fill="#1a1a2e">DepartmentRepository · HistoryRepository</text>
+
+  <rect x="350" y="445" width="200" height="28" rx="5" fill="#dcfce7" stroke="#137333"/>
+  <text x="450" y="463" text-anchor="middle" font-size="10" font-weight="600" fill="#137333">Spring Security + BCrypt</text>
+
+  <!-- Layer 3: Database -->
+  <rect x="620" y="70" width="240" height="420" rx="10" fill="#F8F9FA" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="620" y="70" width="240" height="40" rx="10" fill="#E65100"/>
+  <rect x="620" y="100" width="240" height="10" fill="#E65100"/>
+  <text x="740" y="96" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Database — MySQL</text>
+
+  <rect x="640" y="130" width="200" height="50" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="740" y="150" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">employee</text>
+  <text x="740" y="168" text-anchor="middle" font-size="9" fill="#64748b">id, name, email, role, status...</text>
+
+  <rect x="640" y="192" width="200" height="50" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="740" y="212" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">department</text>
+  <text x="740" y="230" text-anchor="middle" font-size="9" fill="#64748b">id, name, description, location...</text>
+
+  <rect x="640" y="254" width="200" height="50" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="740" y="274" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">leave_requests</text>
+  <text x="740" y="292" text-anchor="middle" font-size="9" fill="#64748b">id, type, startDate, status...</text>
+
+  <rect x="640" y="316" width="200" height="50" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="740" y="336" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">attendance</text>
+  <text x="740" y="354" text-anchor="middle" font-size="9" fill="#64748b">id, checkIn, checkOut, status...</text>
+
+  <rect x="640" y="378" width="200" height="50" rx="6" fill="#fff" stroke="#E2E8F0"/>
+  <text x="740" y="398" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">operation_history</text>
+  <text x="740" y="416" text-anchor="middle" font-size="9" fill="#64748b">id, actor, operation, timestamp...</text>
+
+  <rect x="640" y="445" width="200" height="28" rx="5" fill="#fff3e0" stroke="#E65100"/>
+  <text x="740" y="463" text-anchor="middle" font-size="10" font-weight="600" fill="#E65100">JPA / Hibernate ORM</text>
+
+  <!-- Arrows between layers -->
+  <!-- Frontend -> Backend -->
+  <line x1="280" y1="280" x2="330" y2="280" stroke="#1967D2" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="305" y="272" text-anchor="middle" font-size="9" fill="#1967D2">HTTP</text>
+  <text x="305" y="284" text-anchor="middle" font-size="9" fill="#1967D2">REST</text>
+  <line x1="330" y1="300" x2="280" y2="300" stroke="#D0271D" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="305" y="316" text-anchor="middle" font-size="9" fill="#D0271D">JSON</text>
+
+  <!-- Backend -> Database -->
+  <line x1="570" y1="280" x2="620" y2="280" stroke="#137333" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="595" y="272" text-anchor="middle" font-size="9" fill="#137333">JPA</text>
+  <text x="595" y="284" text-anchor="middle" font-size="9" fill="#137333">Query</text>
+  <line x1="620" y1="300" x2="570" y2="300" stroke="#D0271D" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="595" y="316" text-anchor="middle" font-size="9" fill="#D0271D">Result</text>
+
+  <!-- Port labels -->
+  <text x="160" y="510" text-anchor="middle" font-size="11" font-weight="600" fill="#1967D2">localhost:4200</text>
+  <text x="450" y="510" text-anchor="middle" font-size="11" font-weight="600" fill="#137333">localhost:8085</text>
+  <text x="740" y="510" text-anchor="middle" font-size="11" font-weight="600" fill="#E65100">localhost:3306</text>
+
+  <defs>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1967D2"/></marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#D0271D"/></marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#137333"/></marker>
+  </defs>
+</svg>

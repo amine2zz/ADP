@@ -9,84 +9,123 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, HttpClientModule, FormsModule],
   template: `
-    <div class="dashboard-wrapper">
-      <div class="dash-welcome">
-        <h2>Welcome back, {{ userName }}!</h2>
-        <p>Manage your profile, view your team, and track your requests.</p>
+    <div class="emp-dash slide-up">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div class="welcome-left">
+          <div class="welcome-avatar">{{ userName.charAt(0) }}</div>
+          <div>
+            <h2>Welcome back, {{ userName }}!</h2>
+            <p>{{ employeeData?.jobTitle || 'Employee' }} &nbsp;&middot;&nbsp; {{ employeeData?.department?.name || 'No Department' }}</p>
+          </div>
+        </div>
+        <button class="btn-primary" (click)="openProfileModal()">✏️ Edit Profile</button>
       </div>
 
+      <!-- KPI Row -->
       <div class="kpi-grid">
-        <div class="kpi-card" style="border-top: 4px solid var(--adp-red);">
-          <div class="kpi-title">Clock Status</div>
-          <div class="kpi-value">{{ isClockedIn ? 'Clocked In' : 'Clocked Out' }}</div>
-          <button class="btn-primary" style="margin-top: 1rem; width: 100%;" (click)="toggleClock()">
+        <div class="kpi-card" style="--accent: #D0271D">
+          <div class="kpi-icon" style="background:#fee2e2; color:#D0271D">⏱</div>
+          <div>
+            <div class="kpi-title">Clock Status</div>
+            <div class="kpi-value" style="font-size:1.4rem">{{ isClockedIn ? '🟢 Clocked In' : '🔴 Clocked Out' }}</div>
+          </div>
+          <button class="clock-btn" [class.out]="isClockedIn" (click)="toggleClock()">
             {{ isClockedIn ? 'Clock Out' : 'Clock In' }}
           </button>
         </div>
-        <div class="kpi-card" style="border-top: 4px solid #1967D2);">
-          <div class="kpi-title">My Leaves</div>
-          <div class="kpi-value">12 Days</div>
-          <div class="kpi-trend">Remaining balance</div>
+        <div class="kpi-card" style="--accent: #1967D2">
+          <div class="kpi-icon" style="background:#dbeafe; color:#1967D2">📅</div>
+          <div>
+            <div class="kpi-title">Leave Balance</div>
+            <div class="kpi-value">12 <span style="font-size:1rem;font-weight:500">days</span></div>
+            <div class="kpi-trend">Annual remaining</div>
+          </div>
         </div>
-        <div class="kpi-card" style="border-top: 4px solid #137333;">
-          <div class="kpi-title">Benefits</div>
-          <div class="kpi-value">Active</div>
-          <div class="kpi-trend">Fully Enrolled</div>
-        </div>
-      </div>
-
-      <div class="charts-section">
-        <div class="chart-card">
-          <h3>Request Time Off</h3>
-          <form class="provision-form" (submit)="submitLeave($event)">
-              <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                  <div style="flex: 1;">
-                      <label style="font-size: 0.8rem; font-weight: 600;">Start Date</label>
-                      <input type="date" name="startDate" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--adp-border);">
-                  </div>
-                  <div style="flex: 1;">
-                      <label style="font-size: 0.8rem; font-weight: 600;">End Date</label>
-                      <input type="date" name="endDate" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--adp-border);">
-                  </div>
-              </div>
-              <div style="margin-bottom: 1rem;">
-                  <label style="font-size: 0.8rem; font-weight: 600;">Type</label>
-                  <select name="type" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--adp-border);">
-                    <option value="ANNUAL">Annual Leave</option>
-                    <option value="SICK">Sick Leave</option>
-                    <option value="UNPAID">Unpaid Leave</option>
-                  </select>
-              </div>
-              <textarea name="reason" placeholder="Reason for leave..." required style="width: 100%; padding: 0.5rem; border: 1px solid var(--adp-border); height: 80px; margin-bottom: 1rem;"></textarea>
-              <button type="submit" class="btn-primary" style="width: 100%;">Submit Request</button>
-          </form>
-        </div>
-
-        <div class="chart-card">
-          <h3>Employee Quick Links</h3>
-          <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
-             <button class="btn-primary" style="width: 100%; text-align: left; background-color: var(--adp-white); color: var(--adp-charcoal); border: 1px solid var(--adp-border);">Request Leave</button>
-             <button class="btn-primary" style="width: 100%; text-align: left; background-color: var(--adp-white); color: var(--adp-charcoal); border: 1px solid var(--adp-border);">View Payslips</button>
-             <button (click)="openProfileModal()" class="btn-primary" style="width: 100%; text-align: left; background-color: var(--adp-white); color: var(--adp-charcoal); border: 1px solid var(--adp-border);">Update Profile</button>
+        <div class="kpi-card" style="--accent: #137333">
+          <div class="kpi-icon" style="background:#dcfce7; color:#137333">✅</div>
+          <div>
+            <div class="kpi-title">Account Status</div>
+            <div class="kpi-value" style="font-size:1.3rem">{{ employeeData?.status || 'Active' }}</div>
+            <div class="kpi-trend positive">Fully configured</div>
           </div>
         </div>
       </div>
 
-      <!-- Edit Modal -->
-      <div class="modal" *ngIf="showProfileModal" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index: 1000;">
-        <div class="card" style="width: 500px; max-height: 90vh; overflow-y: auto;">
-          <h3 style="margin-bottom: 1.5rem;">My Profile</h3>
-          <form (submit)="updateProfile($event)" class="provision-form" style="display: flex; flex-direction: column; gap: 1rem;">
-            <div><label style="font-size: 0.8rem; font-weight: 600;">First Name</label><input type="text" name="firstName" [ngModel]="employeeData?.firstName" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;"></div>
-            <div><label style="font-size: 0.8rem; font-weight: 600;">Last Name</label><input type="text" name="lastName" [ngModel]="employeeData?.lastName" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;"></div>
-            <div><label style="font-size: 0.8rem; font-weight: 600;">CIN</label><input type="text" name="cin" [ngModel]="employeeData?.cin" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;"></div>
-            <div><label style="font-size: 0.8rem; font-weight: 600;">Nationality</label><input type="text" name="nationality" [ngModel]="employeeData?.nationality" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;"></div>
-            <div><label style="font-size: 0.8rem; font-weight: 600;">Marital Status</label><input type="text" name="maritalStatus" [ngModel]="employeeData?.maritalStatus" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;"></div>
-            <div><label style="font-size: 0.8rem; font-weight: 600;">Emergency Contact</label><input type="text" name="emergencyContact" [ngModel]="employeeData?.emergencyContact" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px;"></div>
-            
-            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-              <button type="submit" class="btn-primary" style="flex: 1;">Save Changes</button>
-              <button type="button" class="btn-primary" style="flex: 1; background: #e0e0e0; color: #333;" (click)="showProfileModal = false">Cancel</button>
+      <!-- Main Grid -->
+      <div class="main-grid">
+        <!-- Leave Request Form -->
+        <div class="card">
+          <h3 class="section-title">📋 Request Time Off</h3>
+          <form class="leave-form" (submit)="submitLeave($event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" name="startDate" required>
+              </div>
+              <div class="form-group">
+                <label>End Date</label>
+                <input type="date" name="endDate" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Leave Type</label>
+              <select name="type" required>
+                <option value="ANNUAL">🌴 Annual Leave</option>
+                <option value="SICK">🏥 Sick Leave</option>
+                <option value="UNPAID">💼 Unpaid Leave</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Reason</label>
+              <textarea name="reason" placeholder="Brief reason for your leave request..." required style="height:80px; resize:none;"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="width:100%">Submit Request</button>
+          </form>
+        </div>
+
+        <!-- Profile Summary -->
+        <div class="card">
+          <h3 class="section-title">👤 My Profile</h3>
+          <div class="profile-list">
+            <div class="profile-row"><span class="profile-label">Full Name</span><span class="profile-val">{{ employeeData?.firstName }} {{ employeeData?.lastName }}</span></div>
+            <div class="profile-row"><span class="profile-label">Email</span><span class="profile-val">{{ employeeData?.email || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-label">Phone</span><span class="profile-val">{{ employeeData?.phoneNumber || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-label">CIN</span><span class="profile-val">{{ employeeData?.cin || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-label">Nationality</span><span class="profile-val">{{ employeeData?.nationality || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-label">Marital Status</span><span class="profile-val">{{ employeeData?.maritalStatus || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-label">Emergency</span><span class="profile-val">{{ employeeData?.emergencyContact || '—' }}</span></div>
+            <div class="profile-row"><span class="profile-label">Address</span><span class="profile-val">{{ employeeData?.address || '—' }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Edit Modal -->
+      <div class="modal-overlay" *ngIf="showProfileModal">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h3>Edit My Profile</h3>
+            <button class="modal-close" (click)="showProfileModal = false">&times;</button>
+          </div>
+          <form (submit)="updateProfile($event)" style="display:flex; flex-direction:column; gap:1rem;">
+            <div class="form-row">
+              <div class="form-group"><label>First Name</label><input type="text" name="firstName" [value]="employeeData?.firstName || ''"></div>
+              <div class="form-group"><label>Last Name</label><input type="text" name="lastName" [value]="employeeData?.lastName || ''"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Phone Number</label><input type="text" name="phoneNumber" [value]="employeeData?.phoneNumber || ''"></div>
+              <div class="form-group"><label>CIN</label><input type="text" name="cin" [value]="employeeData?.cin || ''"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Nationality</label><input type="text" name="nationality" [value]="employeeData?.nationality || ''"></div>
+              <div class="form-group"><label>Marital Status</label><input type="text" name="maritalStatus" [value]="employeeData?.maritalStatus || ''"></div>
+            </div>
+            <div class="form-group"><label>Address</label><input type="text" name="address" [value]="employeeData?.address || ''"></div>
+            <div class="form-group"><label>Emergency Contact</label><input type="text" name="emergencyContact" [value]="employeeData?.emergencyContact || ''"></div>
+            <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+              <button type="submit" class="btn-primary" style="flex:1">Save Changes</button>
+              <button type="button" class="btn-secondary" style="flex:1" (click)="showProfileModal = false">Cancel</button>
             </div>
           </form>
         </div>
@@ -94,21 +133,51 @@ import { FormsModule } from '@angular/forms';
     </div>
   `,
   styles: [`
-    .dashboard-wrapper { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease; }
-    .dash-welcome h2 { color: var(--adp-charcoal); font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem;}
-    .dash-welcome p { color: var(--adp-dark-gray); font-size: 1rem; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
-    .kpi-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .kpi-title { font-size: 0.85rem; text-transform: uppercase; color: var(--adp-dark-gray); font-weight: 600; }
-    .kpi-value { font-size: 2rem; font-weight: 700; color: var(--adp-charcoal); margin: 0.5rem 0; }
-    .kpi-trend { font-size: 0.85rem; color: var(--adp-dark-gray); }
-    .charts-section { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
-    .chart-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .activity-feed { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1.25rem;}
-    .activity-feed li { display: flex; gap: 1rem; align-items: flex-start; }
-    .activity-icon { width: 32px; height: 32px; border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; }
-    .activity-text { font-size: 0.9rem; line-height: 1.4; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .emp-dash { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .welcome-banner {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      color: white;
+    }
+    .welcome-left { display: flex; align-items: center; gap: 1.25rem; }
+    .welcome-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--adp-red), #ff6b6b);
+      color: white; font-size: 1.5rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .welcome-banner h2 { color: white; font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .welcome-banner p { color: rgba(255,255,255,0.65); font-size: 0.875rem; }
+
+    .kpi-card { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; }
+    .kpi-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+
+    .clock-btn {
+      margin-left: auto;
+      padding: 0.5rem 1.1rem;
+      border: none; border-radius: 6px;
+      font-weight: 700; font-size: 0.8rem;
+      cursor: pointer; transition: all 0.2s;
+      background: var(--adp-red); color: white;
+    }
+    .clock-btn.out { background: #64748b; }
+    .clock-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .main-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem; }
+
+    .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--adp-charcoal); }
+
+    .leave-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .profile-list { display: flex; flex-direction: column; gap: 0; }
+    .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid var(--adp-border); font-size: 0.85rem; }
+    .profile-row:last-child { border-bottom: none; }
+    .profile-label { color: var(--adp-dark-gray); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .profile-val { color: var(--adp-charcoal); font-weight: 500; text-align: right; max-width: 60%; word-break: break-word; }
   `]
 })
 export class EmployeeDashboardComponent implements OnInit {
@@ -125,16 +194,24 @@ export class EmployeeDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.userName = localStorage.getItem('adp_user') || 'Employee';
-    // Parse userId exactly as passed by login module
     const userIdStr = localStorage.getItem('adp_user_id');
     if (userIdStr) {
-        this.userId = parseInt(userIdStr, 10);
+      this.userId = parseInt(userIdStr, 10);
+      // Always fetch fresh data from API
+      this.http.get<any>(`http://localhost:8085/api/employees`).subscribe({
+        next: (employees: any[]) => {
+          const me = employees.find((e: any) => e.id === this.userId);
+          if (me) {
+            this.employeeData = me;
+            this.userName = me.firstName + ' ' + me.lastName;
+            localStorage.setItem('adp_user_full', JSON.stringify(me));
+          }
+        }
+      });
     }
-    
-    // Also try to restore full profile data if available
     const storedUser = localStorage.getItem('adp_user_full');
     if (storedUser && storedUser !== 'undefined') {
-        this.employeeData = JSON.parse(storedUser);
+      this.employeeData = JSON.parse(storedUser);
     }
   }
 
@@ -151,17 +228,19 @@ export class EmployeeDashboardComponent implements OnInit {
       cin: (form.elements.namedItem('cin') as HTMLInputElement).value,
       nationality: (form.elements.namedItem('nationality') as HTMLInputElement).value,
       maritalStatus: (form.elements.namedItem('maritalStatus') as HTMLInputElement).value,
-      emergencyContact: (form.elements.namedItem('emergencyContact') as HTMLInputElement).value
+      emergencyContact: (form.elements.namedItem('emergencyContact') as HTMLInputElement).value,
+      phoneNumber: (form.elements.namedItem('phoneNumber') as HTMLInputElement).value,
+      address: (form.elements.namedItem('address') as HTMLInputElement).value
     };
 
     if (this.userId) {
         this.http.put(`http://localhost:8085/api/employees/${this.userId}`, payload).subscribe({
-        next: (updatedObj) => {
+        next: (updatedObj: any) => {
             this.showProfileModal = false;
             this.notifService.show("Profile Updated Successfully", "success");
             localStorage.setItem('adp_user_full', JSON.stringify(updatedObj));
             this.employeeData = updatedObj;
-            this.userName = this.employeeData.firstName;
+            this.userName = updatedObj.firstName + ' ' + updatedObj.lastName;
         },
         error: () => this.notifService.show("Failed to update profile", "error")
         });

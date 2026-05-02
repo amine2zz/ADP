@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" font-family="Inter, Segoe UI, sans-serif">
+  <rect width="1000" height="620" fill="#ffffff"/>
+  <text x="500" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#1a1a2e">Global Use Case Diagram — Nexus HCM</text>
+  <line x1="150" y1="46" x2="850" y2="46" stroke="#D0271D" stroke-width="2"/>
+
+  <!-- System boundary -->
+  <rect x="220" y="60" width="580" height="530" rx="10" fill="none" stroke="#1a1a2e" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="510" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1a2e">«system» Nexus HCM</text>
+
+  <!-- Use case ellipses -->
+  <!-- Authenticate -->
+  <ellipse cx="510" cy="130" rx="90" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="510" y="134" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Authenticate</text>
+
+  <!-- Manage Employees -->
+  <ellipse cx="340" cy="220" rx="100" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="340" y="224" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Manage Employees</text>
+
+  <!-- Manage Departments -->
+  <ellipse cx="340" cy="310" rx="100" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="340" y="314" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Manage Departments</text>
+
+  <!-- View Audit Trail -->
+  <ellipse cx="340" cy="400" rx="100" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="340" y="404" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">View Audit Trail</text>
+
+  <!-- Approve Leave -->
+  <ellipse cx="510" cy="310" rx="90" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="510" y="314" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Approve Leave</text>
+
+  <!-- Monitor Attendance -->
+  <ellipse cx="510" cy="400" rx="100" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="510" y="404" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Monitor Attendance</text>
+
+  <!-- Submit Leave -->
+  <ellipse cx="690" cy="220" rx="90" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="690" y="224" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Submit Leave</text>
+
+  <!-- Clock In / Out -->
+  <ellipse cx="690" cy="310" rx="90" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="690" y="314" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Clock In / Out</text>
+
+  <!-- Setup Account -->
+  <ellipse cx="690" cy="400" rx="90" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="690" y="404" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Setup Account</text>
+
+  <!-- Update Profile -->
+  <ellipse cx="690" cy="490" rx="90" ry="26" fill="#F8F9FA" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="690" y="494" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">Update Profile</text>
+
+  <!-- ── Actors ── -->
+  <!-- HR Admin -->
+  <circle cx="90" cy="310" r="18" fill="none" stroke="#D0271D" stroke-width="2"/>
+  <line x1="90" y1="328" x2="90" y2="370" stroke="#D0271D" stroke-width="2"/>
+  <line x1="60" y1="345" x2="120" y2="345" stroke="#D0271D" stroke-width="2"/>
+  <line x1="90" y1="370" x2="65" y2="400" stroke="#D0271D" stroke-width="2"/>
+  <line x1="90" y1="370" x2="115" y2="400" stroke="#D0271D" stroke-width="2"/>
+  <text x="90" y="420" text-anchor="middle" font-size="11" font-weight="700" fill="#D0271D">HR Admin</text>
+
+  <!-- Manager -->
+  <circle cx="90" cy="180" r="18" fill="none" stroke="#1967D2" stroke-width="2"/>
+  <line x1="90" y1="198" x2="90" y2="240" stroke="#1967D2" stroke-width="2"/>
+  <line x1="60" y1="215" x2="120" y2="215" stroke="#1967D2" stroke-width="2"/>
+  <line x1="90" y1="240" x2="65" y2="270" stroke="#1967D2" stroke-width="2"/>
+  <line x1="90" y1="240" x2="115" y2="270" stroke="#1967D2" stroke-width="2"/>
+  <text x="90" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#1967D2">Manager</text>
+
+  <!-- Employee -->
+  <circle cx="920" cy="350" r="18" fill="none" stroke="#137333" stroke-width="2"/>
+  <line x1="920" y1="368" x2="920" y2="410" stroke="#137333" stroke-width="2"/>
+  <line x1="890" y1="385" x2="950" y2="385" stroke="#137333" stroke-width="2"/>
+  <line x1="920" y1="410" x2="895" y2="440" stroke="#137333" stroke-width="2"/>
+  <line x1="920" y1="410" x2="945" y2="440" stroke="#137333" stroke-width="2"/>
+  <text x="920" y="460" text-anchor="middle" font-size="11" font-weight="700" fill="#137333">Employee</text>
+
+  <!-- ── Association lines ── -->
+  <!-- All -> Authenticate -->
+  <line x1="108" y1="300" x2="420" y2="145" stroke="#D0271D" stroke-width="1.2"/>
+  <line x1="108" y1="190" x2="420" y2="135" stroke="#1967D2" stroke-width="1.2"/>
+  <line x1="900" y1="345" x2="780" y2="220" stroke="#137333" stroke-width="1.2"/>
+
+  <!-- HR Admin -> Manage Employees -->
+  <line x1="108" y1="310" x2="240" y2="220" stroke="#D0271D" stroke-width="1.2"/>
+  <!-- HR Admin -> Manage Departments -->
+  <line x1="108" y1="315" x2="240" y2="310" stroke="#D0271D" stroke-width="1.2"/>
+  <!-- HR Admin -> View Audit Trail -->
+  <line x1="108" y1="320" x2="240" y2="400" stroke="#D0271D" stroke-width="1.2"/>
+  <!-- HR Admin -> Approve Leave -->
+  <line x1="108" y1="312" x2="420" y2="310" stroke="#D0271D" stroke-width="1.2"/>
+  <!-- HR Admin -> Monitor Attendance -->
+  <line x1="108" y1="318" x2="410" y2="400" stroke="#D0271D" stroke-width="1.2"/>
+
+  <!-- Manager -> Approve Leave -->
+  <line x1="108" y1="195" x2="420" y2="305" stroke="#1967D2" stroke-width="1.2"/>
+  <!-- Manager -> Monitor Attendance -->
+  <line x1="108" y1="200" x2="410" y2="395" stroke="#1967D2" stroke-width="1.2"/>
+
+  <!-- Employee -> Submit Leave -->
+  <line x1="900" y1="348" x2="780" y2="220" stroke="#137333" stroke-width="1.2"/>
+  <line x1="900" y1="352" x2="780" y2="310" stroke="#137333" stroke-width="1.2"/>
+  <line x1="900" y1="356" x2="780" y2="400" stroke="#137333" stroke-width="1.2"/>
+  <line x1="900" y1="360" x2="780" y2="490" stroke="#137333" stroke-width="1.2"/>
+</svg>

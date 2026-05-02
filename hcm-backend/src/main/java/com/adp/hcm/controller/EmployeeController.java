@@ -82,6 +82,11 @@ public class EmployeeController {
         return ResponseEntity.ok(hrService.submitLeaveRequest(employee, leave));
     }
 
+    @PutMapping("/employees/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable("id") Long id, @RequestBody Employee employee) {
+        return ResponseEntity.ok(employeeService.updateEmployee(id, employee));
+    }
+
     @PostMapping("/employees/{id}/attendance")
     public ResponseEntity<?> logAttendance(@PathVariable("id") Long id, @RequestBody Map<String, Boolean> payload) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));

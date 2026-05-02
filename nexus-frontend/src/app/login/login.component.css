@@ -1,79 +1,220 @@
-.login-container {
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 1000;
+}
+
+/* ── Left Panel ── */
+.login-left {
+  flex: 1;
+  background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-left::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(208,39,29,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.login-left::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: -80px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(25,103,210,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.adp-logo-badge {
+  background: #D0271D;
+  color: white;
+  font-weight: 900;
+  font-size: 1.1rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  letter-spacing: -0.5px;
+}
+
+.brand-name {
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.hero-text {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-text h1 {
+  color: white;
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.hero-text p {
+  color: rgba(255,255,255,0.65);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 380px;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  position: relative;
+  z-index: 1;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255,255,255,0.75);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.feature-icon {
+  font-size: 1.1rem;
+}
+
+/* ── Right Panel ── */
+.login-right {
+  width: 480px;
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: var(--adp-light-gray);
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1000; /* Overlays the dashboard shell */
+  padding: 2rem;
 }
 
 .login-box {
-  background: var(--adp-white);
-  padding: 3rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
 }
 
-.adp-login-header {
-  text-align: center;
+.login-header {
   margin-bottom: 2rem;
 }
 
-.logo-text {
-  color: var(--adp-red);
-  font-size: 2.5rem;
-  margin: 0;
-  letter-spacing: 2px;
+.login-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.4rem;
 }
 
-.adp-login-header h2 {
-  color: var(--adp-charcoal);
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-label {
-  font-weight: 500;
-  color: var(--adp-dark-gray);
+.login-header p {
+  color: #64748b;
   font-size: 0.9rem;
 }
 
-input {
-  padding: 0.75rem;
-  border: 1px solid var(--adp-border);
-  border-radius: 4px;
-  font-size: 1rem;
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
-input:focus {
+.login-form .form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.login-form .form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: #fafafa;
+}
+
+.login-form .form-group input:focus {
   outline: none;
-  border-color: var(--adp-red);
-  box-shadow: 0 0 0 2px rgba(208, 39, 29, 0.1);
+  border-color: #D0271D;
+  box-shadow: 0 0 0 3px rgba(208,39,29,0.1);
+  background: white;
 }
 
-.login-btn {
+.btn-signin {
   width: 100%;
   padding: 0.85rem;
-  font-size: 1rem;
-  margin-top: 1rem;
+  background: #D0271D;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+  letter-spacing: 0.02em;
 }
+
+.btn-signin:hover {
+  background: #A81E15;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(208,39,29,0.35);
+}
+
+.btn-signin:active { transform: translateY(0); }
 
 .login-footer {
   text-align: center;
-  margin-top: 1.5rem;
   font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-footer a { color: #D0271D; font-weight: 600; }
+.login-footer a:hover { text-decoration: underline; }
+.divider { color: #cbd5e1; }
+
+.login-copy {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.5rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .login-left { display: none; }
+  .login-right { width: 100%; }
 }

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="Inter, Segoe UI, sans-serif">
+  <rect width="900" height="560" fill="#ffffff"/>
+  <text x="450" y="34" text-anchor="middle" font-size="17" font-weight="800" fill="#1a1a2e">Sequence Diagram — Authentication</text>
+  <line x1="100" y1="44" x2="800" y2="44" stroke="#D0271D" stroke-width="2"/>
+
+  <!-- Lifeline headers -->
+  <rect x="60" y="60" width="110" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="115" y="83" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">User</text>
+
+  <rect x="240" y="60" width="140" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="310" y="83" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">LoginComponent</text>
+
+  <rect x="450" y="60" width="160" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="530" y="83" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">EmployeeController</text>
+
+  <rect x="680" y="60" width="140" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="750" y="83" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">EmployeeService</text>
+
+  <!-- Lifelines -->
+  <line x1="115" y1="96" x2="115" y2="530" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="310" y1="96" x2="310" y2="530" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="530" y1="96" x2="530" y2="530" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="750" y1="96" x2="750" y2="530" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- Activation boxes -->
+  <rect x="108" y="140" width="14" height="300" fill="#D0271D" opacity="0.2"/>
+  <rect x="303" y="160" width="14" height="260" fill="#1967D2" opacity="0.2"/>
+  <rect x="523" y="180" width="14" height="220" fill="#137333" opacity="0.2"/>
+  <rect x="743" y="200" width="14" height="160" fill="#E65100" opacity="0.2"/>
+
+  <!-- Step 1: User submits form -->
+  <line x1="122" y1="150" x2="303" y2="150" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="200" y="144" text-anchor="middle" font-size="10" fill="#1a1a2e">submit(email, password)</text>
+
+  <!-- Step 2: POST /api/auth/login -->
+  <line x1="317" y1="180" x2="523" y2="180" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="415" y="174" text-anchor="middle" font-size="10" fill="#1a1a2e">POST /api/auth/login</text>
+
+  <!-- Step 3: authenticate() -->
+  <line x1="537" y1="210" x2="743" y2="210" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="635" y="204" text-anchor="middle" font-size="10" fill="#1a1a2e">authenticate(email, pwd)</text>
+
+  <!-- Step 4: findByEmail + BCrypt -->
+  <line x1="750" y1="240" x2="750" y2="270" stroke="#1a1a2e" stroke-width="1.5"/>
+  <rect x="720" y="270" width="60" height="30" rx="4" fill="#F8F9FA" stroke="#E2E8F0"/>
+  <text x="750" y="289" text-anchor="middle" font-size="9" fill="#1a1a2e">BCrypt verify</text>
+
+  <!-- Step 5: return Employee -->
+  <line x1="743" y1="320" x2="537" y2="320" stroke="#D0271D" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="635" y="314" text-anchor="middle" font-size="10" fill="#D0271D">Employee object</text>
+
+  <!-- Step 6: return 200 OK -->
+  <line x1="523" y1="350" x2="317" y2="350" stroke="#D0271D" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="415" y="344" text-anchor="middle" font-size="10" fill="#D0271D">200 OK + Employee JSON</text>
+
+  <!-- Step 7: store localStorage + redirect -->
+  <line x1="303" y1="380" x2="122" y2="380" stroke="#D0271D" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="200" y="374" text-anchor="middle" font-size="10" fill="#D0271D">store role/id + redirect</text>
+
+  <!-- Alt: failure -->
+  <rect x="300" y="410" width="460" height="70" rx="4" fill="none" stroke="#E65100" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="315" y="428" font-size="10" font-weight="700" fill="#E65100">alt [invalid credentials]</text>
+  <line x1="523" y1="445" x2="317" y2="445" stroke="#E65100" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowOrange)"/>
+  <text x="415" y="439" text-anchor="middle" font-size="10" fill="#E65100">401 Unauthorized</text>
+  <line x1="303" y1="465" x2="122" y2="465" stroke="#E65100" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowOrange)"/>
+  <text x="200" y="459" text-anchor="middle" font-size="10" fill="#E65100">show error toast</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#1a1a2e"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D0271D"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E65100"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,59 +1,235 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* ADP Brand Colors */
   --adp-red: #D0271D;
   --adp-red-dark: #A81E15;
-  --adp-charcoal: #231F20;
-  --adp-dark-gray: #4B4B4B;
-  --adp-light-gray: #F3F4F6;
-  --adp-border: #E5E7EB;
+  --adp-red-light: #fdf2f2;
+  --adp-charcoal: #1a1a2e;
+  --adp-dark-gray: #4B5563;
+  --adp-light-gray: #F1F5F9;
+  --adp-border: #E2E8F0;
   --adp-white: #FFFFFF;
-
-  /* Fonts */
-  --font-family: 'Inter', 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --adp-blue: #1967D2;
+  --adp-green: #137333;
+  --adp-orange: #E65100;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: var(--font-family);
   background-color: var(--adp-light-gray);
   color: var(--adp-charcoal);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4 { font-weight: 700; color: var(--adp-charcoal); line-height: 1.3; }
+
+a { color: var(--adp-red); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--adp-red-dark); }
+
+/* ── Buttons ── */
+.btn-primary {
+  background: var(--adp-red);
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: var(--radius-sm);
   font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: var(--adp-red-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(208,39,29,0.3); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: white;
+  color: var(--adp-charcoal);
+  padding: 0.6rem 1.4rem;
+  border: 1.5px solid var(--adp-border);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover { border-color: var(--adp-red); color: var(--adp-red); background: var(--adp-red-light); }
+
+/* ── Cards ── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--adp-border);
+  padding: 1.5rem;
+}
+
+/* ── Tables ── */
+.adp-table { width: 100%; border-collapse: collapse; }
+.adp-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--adp-dark-gray);
+  background: var(--adp-light-gray);
+  border-bottom: 1px solid var(--adp-border);
+}
+.adp-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--adp-border);
   color: var(--adp-charcoal);
 }
+.adp-table tbody tr { transition: background 0.15s; }
+.adp-table tbody tr:hover { background: #f8faff; }
+.adp-table tbody tr:last-child td { border-bottom: none; }
 
-a {
-  color: var(--adp-red);
-  text-decoration: none;
-  transition: color 0.3s ease;
+/* ── Badges ── */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: inline-block;
+}
+.status-badge.active { background: #dcfce7; color: #15803d; }
+.status-badge.pending_setup { background: #fff7ed; color: #c2410c; }
+.status-badge.inactive { background: #f1f5f9; color: #64748b; }
+.status-badge.unknown { background: #f1f5f9; color: #64748b; }
+
+.role-badge {
+  background: #eff6ff;
+  color: var(--adp-blue);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: inline-block;
 }
 
-a:hover {
-  color: var(--adp-red-dark);
+/* ── Forms ── */
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-group label { font-size: 0.8rem; font-weight: 600; color: var(--adp-dark-gray); }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--adp-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-family: var(--font-family);
+  color: var(--adp-charcoal);
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--adp-red);
+  box-shadow: 0 0 0 3px rgba(208,39,29,0.1);
 }
 
-/* Common UI Utility Classes */
-.btn-primary {
-  background-color: var(--adp-red);
-  color: var(--adp-white);
-  padding: 0.5rem 1.2rem;
+/* ── KPI Cards ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+.kpi-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--adp-border);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--adp-dark-gray); margin-bottom: 0.5rem; }
+.kpi-value { font-size: 2.25rem; font-weight: 800; color: var(--adp-charcoal); line-height: 1; margin-bottom: 0.5rem; }
+.kpi-trend { font-size: 0.78rem; color: var(--adp-dark-gray); }
+.kpi-trend.positive { color: var(--adp-green); font-weight: 600; }
+.kpi-trend.negative { color: var(--adp-orange); font-weight: 600; }
+
+/* ── Tabs ── */
+.tabs { display: flex; gap: 0.25rem; border-bottom: 2px solid var(--adp-border); margin-bottom: 1.5rem; }
+.tab-btn {
+  background: none;
   border: none;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--adp-dark-gray);
   cursor: pointer;
-  transition: background-color 0.2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  border-radius: 6px 6px 0 0;
 }
+.tab-btn:hover { color: var(--adp-red); background: var(--adp-red-light); }
+.tab-btn.active { color: var(--adp-red); border-bottom-color: var(--adp-red); background: var(--adp-red-light); }
 
-.btn-primary:hover {
-  background-color: var(--adp-red-dark);
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15,23,42,0.5);
+  backdrop-filter: blur(4px);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
 }
+.modal-box {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+  animation: slideUp 0.3s ease;
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.modal-header h3 { font-size: 1.1rem; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--adp-dark-gray); line-height: 1; padding: 0.25rem; border-radius: 4px; }
+.modal-close:hover { background: var(--adp-light-gray); }
+
+/* ── Page Header ── */
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.75rem; }
+.page-header h2 { font-size: 1.5rem; font-weight: 800; color: var(--adp-charcoal); }
+.page-header p { font-size: 0.875rem; color: var(--adp-dark-gray); margin-top: 0.25rem; }
+
+/* ── Animations ── */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.4s ease; }
+.slide-up { animation: slideUp 0.4s ease; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--adp-light-gray); }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

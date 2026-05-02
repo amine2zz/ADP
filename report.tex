@@ -1,0 +1,381 @@
+\documentclass[12pt,a4paper]{article}
+
+% ── Packages ────────────────────────────────
+\usepackage{graphicx}
+\usepackage[margin=2.5cm, top=3cm, bottom=3cm]{geometry}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{caption}
+
+% ── Colors ──────────────────────────────────
+\definecolor{adpred}{HTML}{D0271D}
+\definecolor{adpdark}{HTML}{1a1a2e}
+\definecolor{adpgray}{HTML}{4B5563}
+\definecolor{adplightgray}{HTML}{F8F9FA}
+\definecolor{adpborder}{HTML}{DEE2E6}
+
+% ── Page Layout ─────────────────────────────
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{9pt}
+
+% ── Header / Footer ─────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{{\color{adpred}\hrule width\headwidth height 0.4pt}}
+\lhead{\small\color{adpgray}\textit{Nexus HCM — Internship Report}}
+\rhead{\small\color{adpgray}\textit{GHARIANI Mohamed Amine}}
+\cfoot{\small\color{adpgray}\thepage}
+
+% ── Section Styling ─────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{adpdark}}
+  {\color{adpred}\thesection.}{0.5em}{}
+  [\vspace{2pt}{\color{adpred}\titlerule[1.2pt]}\vspace{2pt}]
+
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{adpdark}}
+  {\color{adpgray}\thesubsection}{0.5em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{adpgray}}
+  {\thesubsubsection}{0.5em}{}
+
+\titlespacing{\section}{0pt}{22pt}{8pt}
+\titlespacing{\subsection}{0pt}{14pt}{4pt}
+\titlespacing{\subsubsection}{0pt}{10pt}{4pt}
+
+% ── Table Styling ────────────────────────────
+\renewcommand{\arraystretch}{1.55}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% ── List Styling ─────────────────────────────
+\setlist[itemize]{leftmargin=1.5em, itemsep=3pt, topsep=4pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=3pt, topsep=4pt}
+
+% ── Caption Styling ──────────────────────────
+\captionsetup{
+  font=small,
+  labelfont={bf, color=adpgray},
+  textfont=it,
+  justification=centering
+}
+
+% ── Horizontal Rule Helper ───────────────────
+\newcommand{\redrule}{\vspace{4pt}{\color{adpred}\hrule height 1pt}\vspace{4pt}}
+
+% ─────────────────────────────────────────────
+\begin{document}
+
+% ════════════════════════════════════════════
+% TITLE PAGE
+% ════════════════════════════════════════════
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+
+{\large\bfseries\color{adpdark}
+  ESPRIT — École Supérieure Privée d'Ingénierie et de Technologies
+}\\[0.3cm]
+{\normalsize\color{adpgray} Engineering Degree in Computer Science}
+
+\vspace{1.2cm}
+{\color{adpborder}\rule{\linewidth}{0.5pt}}
+\vspace{1.2cm}
+
+{\fontsize{11}{13}\selectfont\color{adpgray}\textit{End-of-Studies Internship Report}}\\[0.6cm]
+{\LARGE\bfseries\color{adpdark} Nexus HCM}\\[0.3cm]
+{\Large\color{adpgray} Intelligent Human Capital Management System}
+
+\vspace{0.8cm}
+{\color{adpred}\rule{8cm}{1.2pt}}
+\vspace{1.8cm}
+
+\begin{minipage}{0.46\textwidth}
+\begin{flushleft}
+{\small\bfseries\color{adpgray} AUTHOR}\\[2pt]
+{\normalsize\color{adpdark} GHARIANI Mohamed Amine}\\[0.7cm]
+{\small\bfseries\color{adpgray} ACADEMIC SUPERVISOR}\\[2pt]
+{\normalsize\color{adpdark} Amani Lamine}\\
+{\small\color{adpgray}\ttfamily amani.lamine@esprit.tn}
+\end{flushleft}
+\end{minipage}
+\hfill
+\begin{minipage}{0.46\textwidth}
+\begin{flushright}
+{\small\bfseries\color{adpgray} HOST COMPANY}\\[2pt]
+{\normalsize\color{adpdark} ADP ES Tunisie}\\
+{\small\color{adpgray} Sana Business Center, Tunis}\\[0.7cm]
+{\small\bfseries\color{adpgray} COMPANY SUPERVISOR}\\[2pt]
+{\normalsize\color{adpdark} Ben Fraj Sayed}\\
+{\small\color{adpgray}\ttfamily sayed.ben.fraj@adp.com}
+\end{flushright}
+\end{minipage}
+
+\vfill
+{\color{adpborder}\rule{\linewidth}{0.5pt}}\\[0.4cm]
+{\small\color{adpgray} Academic Year 2025 — 2026}
+\end{titlepage}
+
+% ── Table of Contents ────────────────────────
+\newpage
+\tableofcontents
+\newpage
+
+% ════════════════════════════════════════════
+% CHAPTER TITLE PAGE
+% ════════════════════════════════════════════
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+
+\begin{center}
+  {\color{adpred}\rule{4cm}{1.2pt}}\\[1.2cm]
+  {\fontsize{13}{15}\selectfont\color{adpgray}\textit{Chapter 1}}\\[0.6cm]
+  {\LARGE\bfseries\color{adpdark} Project Presentation and Framework}\\[1.2cm]
+  {\color{adpred}\rule{4cm}{1.2pt}}
+\end{center}
+
+\vspace*{\fill}
+\newpage
+
+% ── 1. Introduction ──────────────────────────
+\section{Introduction}
+
+This chapter presents the general framework of the end-of-studies internship project carried out
+at \textbf{ADP ES Tunisie}. It introduces the host organization, defines the objectives of the
+requested work, analyzes the existing situation, and proposes a solution to address the identified
+problems. Finally, it describes the project management methodology adopted throughout the
+development process.
+
+% ── 2. Presentation ──────────────────────────
+\section{Presentation}
+
+\subsection{Presentation of the Host Organization}
+
+\textbf{ADP (Automatic Data Processing)} is one of the world's largest providers of Human Capital
+Management (HCM) solutions, serving over 1 million clients across more than 140 countries.
+Founded in 1949 in the United States, ADP offers a comprehensive suite of HR, payroll, talent
+management, and workforce analytics services.
+
+\textbf{ADP ES Tunisie} is the Tunisian subsidiary of ADP, located at the Sana Business Center,
+Boulevard de l'Environnement, Tunis. The office operates as a technology and engineering center,
+contributing to the development and maintenance of ADP's global HR software platforms.
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{tabular}{C{4.5cm} C{7cm}}
+\toprule
+\textbf{Field} & \textbf{Information} \\
+\midrule
+Company Name    & ADP ES Tunisie \\
+Sector          & Information Technology / HR Solutions \\
+Headquarters    & Centre Urbain, Tunis 1003 \\
+Email           & ADP.es@adp.com \\
+Phone           & +216 71 110 606 \\
+Website         & www.adp.com \\
+\bottomrule
+\end{tabular}
+\captionof{table}{ADP ES Tunisie — Company Information}
+\end{center}
+
+\subsection{Objective of the Requested Work}
+
+The objective of this internship is to design and develop a full-stack \textbf{Intelligent Human
+Capital Management (HCM) Platform} — named \textit{Nexus HCM} — that centralizes and automates
+the core HR operations within an enterprise environment.
+
+The platform targets three distinct user roles:
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{tabular}{C{3.5cm} L{9cm}}
+\toprule
+\textbf{Role} & \textbf{Responsibilities} \\
+\midrule
+HR Administrator &
+  Manages the entire employee roster, provisions accounts, oversees all leave requests,
+  attendance data, and system audit logs. \\
+Manager &
+  Supervises their direct team, approves or rejects leave requests, and monitors team
+  attendance through a weekly calendar view. \\
+Employee &
+  Manages their personal profile, submits leave requests, and tracks attendance via a
+  clock-in / clock-out mechanism. \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Platform User Roles and Responsibilities}
+\end{center}
+
+\subsection{Study of the Existing Situation}
+
+\subsubsection{Analysis of Current HR Management Practices}
+
+In many enterprises, HR management is still handled through a combination of disconnected tools:
+spreadsheets for employee records, email chains for leave approvals, and manual timesheets for
+attendance tracking. This fragmented approach leads to several operational challenges:
+
+\begin{itemize}
+  \item \textbf{Manual data entry} increases the risk of errors and inconsistencies in employee records.
+  \item \textbf{Lack of a unified platform} forces HR teams to switch between multiple tools, reducing productivity.
+  \item \textbf{No real-time visibility} over workforce availability, pending leave requests, or attendance patterns.
+  \item \textbf{Absence of an audit trail} makes it difficult to track who performed which HR action and when.
+  \item \textbf{Poor onboarding experience} for new employees, who often receive credentials through insecure channels.
+\end{itemize}
+
+\subsubsection{Critique of the Existing Situation}
+
+The analysis of the current state reveals the following critical weaknesses:
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{tabular}{C{5.5cm} C{7.5cm}}
+\toprule
+\textbf{Identified Problem} & \textbf{Impact on the Organization} \\
+\midrule
+No centralized employee database &
+  Data scattered across files and emails, leading to inconsistencies \\
+Manual leave approval process &
+  Slow response times, no traceability, risk of lost requests \\
+No attendance tracking system &
+  Impossible to monitor punctuality, absences, or overtime \\
+No role-based access control &
+  Sensitive HR data accessible to unauthorized personnel \\
+No onboarding automation &
+  New employees receive credentials through insecure channels \\
+No audit logging &
+  No accountability or traceability for HR actions \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Critique of the Existing HR Management Situation}
+\end{center}
+
+% ── 3. Proposed Solution ─────────────────────
+\section{Proposed Solution}
+
+\subsection{Objectives of the Proposed Solution}
+
+The proposed solution, \textbf{Nexus HCM}, is a centralized, intelligent HR management platform
+that directly addresses all identified weaknesses. Its core objectives are:
+
+\begin{enumerate}
+  \item Provide a \textbf{single unified platform} for all HR operations.
+  \item Automate the \textbf{employee onboarding} process with secure token-based account activation.
+  \item Implement \textbf{role-based access control} to protect sensitive HR data.
+  \item Enable \textbf{real-time leave management} with a structured approval workflow.
+  \item Track \textbf{employee attendance} through a digital clock-in / clock-out system.
+  \item Maintain a complete \textbf{audit trail} of all HR operations.
+  \item Integrate an \textbf{AI-powered report generation} feature using an external AI API.
+\end{enumerate}
+
+\subsubsection{Objective Comparison: Existing vs.\ Proposed Solution}
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{tabular}{C{4.2cm} C{4.2cm} C{4.2cm}}
+\toprule
+\textbf{Feature} & \textbf{Existing Approach} & \textbf{Nexus HCM} \\
+\midrule
+Employee Management  & Manual / Spreadsheets    & Centralized digital roster \\
+Leave Approval       & Email-based              & Automated approval workflow \\
+Attendance Tracking  & Paper timesheets         & Digital clock-in / clock-out \\
+Role-Based Access    & None                     & HR Admin / Manager / Employee \\
+Onboarding           & Manual                   & Token-based email activation \\
+Audit Trail          & None                     & Full operation history log \\
+Reporting            & Manual                   & AI-generated smart reports \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Comparison: Existing Situation vs.\ Nexus HCM}
+\end{center}
+
+% ── 4. Project Management ────────────────────
+\section{Project Management}
+
+\subsection{Adopted Methodology}
+
+\subsubsection{Choice of Methodology}
+
+For this project, the \textbf{V-Model} (Verification and Validation Model) was selected as the
+development methodology. This choice is justified by the structured and well-defined nature of
+the project requirements, established at the beginning of the internship in collaboration with
+the company supervisor.
+
+The V-Model is particularly suited for this project because:
+
+\begin{itemize}
+  \item The requirements are clearly defined and unlikely to change significantly.
+  \item Each development phase has a corresponding testing phase, ensuring quality at every level.
+  \item It provides a clear and traceable path from requirements to final delivery.
+\end{itemize}
+
+\subsubsection{Presentation of the V-Model}
+
+The V-Model is a sequential software development process in which each development phase is
+directly associated with a corresponding testing phase. The left side of the ``V'' represents
+the decomposition of requirements and system design, while the right side represents the
+integration and verification of each component.
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{tabular}{C{5cm} C{2cm} C{5cm}}
+\toprule
+\textbf{Development Phase} & & \textbf{Verification Phase} \\
+\midrule
+Requirements Analysis  & $\longleftrightarrow$ & Acceptance Testing \\
+System Design          & $\longleftrightarrow$ & System Testing \\
+Architecture Design    & $\longleftrightarrow$ & Integration Testing \\
+Module Design          & $\longleftrightarrow$ & Unit Testing \\
+\midrule
+\multicolumn{3}{c}{\textit{Implementation — Center of the V}} \\
+\bottomrule
+\end{tabular}
+\captionof{table}{V-Model Development and Verification Phases}
+\end{center}
+
+\subsubsection{Roles in the V-Model}
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{tabular}{C{4cm} C{8.5cm}}
+\toprule
+\textbf{Role} & \textbf{Responsibility} \\
+\midrule
+Developer       & Implements features according to design specifications \\
+Tester          & Validates each module against its corresponding requirements \\
+Project Manager & Ensures timeline adherence and milestone delivery \\
+HR Stakeholder  & Validates functional requirements and acceptance criteria \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Team Roles in the V-Model}
+\end{center}
+
+% ── 5. Conclusion ────────────────────────────
+\section{Conclusion}
+
+This chapter provided a comprehensive overview of the project framework. It introduced
+\textbf{ADP ES Tunisie} as the host organization, analyzed the limitations of current HR
+management practices, and presented \textbf{Nexus HCM} as a structured solution to these
+challenges. The adoption of the V-Model methodology ensures a disciplined and quality-driven
+development process throughout the six-month internship period.
+
+The following chapters will detail the technical design, system architecture, implementation,
+and testing of each module of the platform.
+
+\end{document}

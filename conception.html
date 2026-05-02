@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chapter 2 — System Design & Conception | Nexus HCM</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F1F5F9;
+      color: #1a1a2e;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      background: white;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 1.5rem 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+    .adp-badge {
+      background: #D0271D;
+      color: white;
+      font-weight: 900;
+      font-size: 1rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 5px;
+      letter-spacing: -0.5px;
+    }
+    .header-title { font-size: 1rem; font-weight: 700; color: #1a1a2e; }
+    .header-sub { font-size: 0.8rem; color: #64748b; margin-top: 1px; }
+    .divider { width: 1px; height: 32px; background: #E2E8F0; }
+
+    /* ── Chapter Banner ── */
+    .chapter-banner {
+      background: white;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 3rem;
+      text-align: center;
+    }
+    .chapter-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #D0271D;
+      margin-bottom: 0.5rem;
+    }
+    .chapter-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin-bottom: 0.5rem;
+    }
+    .chapter-desc {
+      font-size: 0.9rem;
+      color: #64748b;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .red-rule {
+      width: 60px;
+      height: 3px;
+      background: #D0271D;
+      margin: 1.25rem auto 0;
+      border-radius: 2px;
+    }
+
+    /* ── Nav Pills ── */
+    .nav-pills {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.25rem 3rem;
+      background: white;
+      border-bottom: 1px solid #E2E8F0;
+      flex-wrap: wrap;
+    }
+    .nav-pill {
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #F1F5F9;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .nav-pill:hover, .nav-pill.active {
+      background: #D0271D;
+      color: white;
+    }
+
+    /* ── Main Content ── */
+    .content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+    }
+
+    /* ── Section ── */
+    .section { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1.5px solid #E2E8F0;
+    }
+    .section-number {
+      background: #D0271D;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 800;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .section-desc {
+      font-size: 0.875rem;
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    /* ── Diagram Card ── */
+    .diagram-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s;
+    }
+    .diagram-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.09); }
+
+    .diagram-card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .diagram-card-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .diagram-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 10px;
+      background: #FEF2F2;
+      color: #D0271D;
+    }
+
+    .diagram-img-wrap {
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 320px;
+      background: #FAFAFA;
+    }
+    .diagram-img-wrap img {
+      max-width: 100%;
+      max-height: 600px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
+    /* Placeholder when image is missing */
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 100%;
+      min-height: 280px;
+      border: 2px dashed #CBD5E1;
+      border-radius: 8px;
+      color: #94A3B8;
+    }
+    .placeholder-icon { font-size: 2.5rem; }
+    .placeholder-text { font-size: 0.85rem; font-weight: 600; }
+    .placeholder-hint { font-size: 0.75rem; color: #CBD5E1; }
+
+    .diagram-caption {
+      padding: 0.75rem 1.5rem;
+      border-top: 1px solid #E2E8F0;
+      font-size: 0.78rem;
+      color: #64748b;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ── Two-column grid ── */
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      background: #1a1a2e;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.78rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .diagram-grid { grid-template-columns: 1fr; }
+      .content { padding: 2rem 1rem; }
+      .page-header { padding: 1rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="adp-badge">ADP</div>
+    <div class="divider"></div>
+    <div>
+      <div class="header-title">Nexus HCM</div>
+      <div class="header-sub">Internship Report — GHARIANI Mohamed Amine</div>
+    </div>
+  </header>
+
+  <!-- Chapter Banner -->
+  <div class="chapter-banner">
+    <div class="chapter-label">Chapter 2</div>
+    <div class="chapter-title">System Design &amp; Conception</div>
+    <div class="chapter-desc">
+      Visual diagrams representing the architecture, data model, use cases,
+      and interaction flows of the Nexus HCM platform.
+    </div>
+    <div class="red-rule"></div>
+  </div>
+
+  <!-- Nav Pills -->
+  <nav class="nav-pills">
+    <a href="#actors"     class="nav-pill">Actors</a>
+    <a href="#usecase"    class="nav-pill">Use Case Diagrams</a>
+    <a href="#class"      class="nav-pill">Class Diagram</a>
+    <a href="#sequence"   class="nav-pill">Sequence Diagrams</a>
+    <a href="#arch"       class="nav-pill">Architecture</a>
+  </nav>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- 1. Actors -->
+    <section class="section" id="actors">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <div class="section-title">System Actors</div>
+      </div>
+      <p class="section-desc">
+        The Nexus HCM platform involves three primary actors: the HR Administrator,
+        the Manager, and the Employee. Each actor interacts with the system through
+        a dedicated interface with role-specific access and functionalities.
+      </p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">System Actors Diagram</span>
+          <span class="diagram-tag">Actors</span>
+        </div>
+        <div class="diagram-img-wrap">
+          <img src="diagrams/actors.png" alt="System Actors Diagram"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="placeholder" style="display:none;">
+            <div class="placeholder-icon">👤</div>
+            <div class="placeholder-text">actors.png</div>
+            <div class="placeholder-hint">Place your image in /diagrams/actors.png</div>
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 1 — Nexus HCM System Actors</div>
+      </div>
+    </section>
+
+    <!-- 2. Use Case Diagrams -->
+    <section class="section" id="usecase">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <div class="section-title">Use Case Diagrams</div>
+      </div>
+      <p class="section-desc">
+        Use case diagrams illustrate the interactions between each actor and the system.
+        The global diagram shows the full scope of the platform, while the detailed
+        diagrams focus on the most critical workflows.
+      </p>
+
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Global Use Case Diagram</span>
+          <span class="diagram-tag">Use Case</span>
+        </div>
+        <div class="diagram-img-wrap">
+          <img src="diagrams/usecase-global.svg" alt="Global Use Case Diagram"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="placeholder" style="display:none;">
+            <div class="placeholder-icon">📊</div>
+            <div class="placeholder-text">usecase-global.png</div>
+            <div class="placeholder-hint">Place your image in /diagrams/usecase-global.png</div>
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 2 — Global Use Case Diagram</div>
+      </div>
+
+      <div class="diagram-grid">
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">HR Administrator Use Cases</span>
+            <span class="diagram-tag">Use Case</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/usecase-hradmin.png" alt="HR Admin Use Cases"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">🛡️</div>
+              <div class="placeholder-text">usecase-hradmin.png</div>
+              <div class="placeholder-hint">/diagrams/usecase-hradmin.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 3 — HR Administrator Use Cases</div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">Manager Use Cases</span>
+            <span class="diagram-tag">Use Case</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/usecase-manager.png" alt="Manager Use Cases"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">👔</div>
+              <div class="placeholder-text">usecase-manager.png</div>
+              <div class="placeholder-hint">/diagrams/usecase-manager.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 4 — Manager Use Cases</div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">Employee Use Cases</span>
+            <span class="diagram-tag">Use Case</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/usecase-employee.png" alt="Employee Use Cases"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">👤</div>
+              <div class="placeholder-text">usecase-employee.png</div>
+              <div class="placeholder-hint">/diagrams/usecase-employee.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 5 — Employee Use Cases</div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">Leave Management Use Case</span>
+            <span class="diagram-tag">Use Case</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/usecase-leave.png" alt="Leave Management Use Case"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">📅</div>
+              <div class="placeholder-text">usecase-leave.png</div>
+              <div class="placeholder-hint">/diagrams/usecase-leave.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 6 — Leave Management Use Case</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Class Diagram -->
+    <section class="section" id="class">
+      <div class="section-header">
+        <div class="section-number">3</div>
+        <div class="section-title">Class Diagram</div>
+      </div>
+      <p class="section-desc">
+        The class diagram represents the data model of the Nexus HCM platform,
+        showing the five core entities — Employee, Department, LeaveRequest,
+        Attendance, and OperationHistory — along with their attributes and relationships.
+      </p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Class Diagram — Data Model</span>
+          <span class="diagram-tag">Class</span>
+        </div>
+        <div class="diagram-img-wrap">
+          <img src="diagrams/class-diagram.svg" alt="Class Diagram"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="placeholder" style="display:none;">
+            <div class="placeholder-icon">🗂️</div>
+            <div class="placeholder-text">class-diagram.png</div>
+            <div class="placeholder-hint">Place your image in /diagrams/class-diagram.png</div>
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 7 — Nexus HCM Class Diagram</div>
+      </div>
+    </section>
+
+    <!-- 4. Sequence Diagrams -->
+    <section class="section" id="sequence">
+      <div class="section-header">
+        <div class="section-number">4</div>
+        <div class="section-title">Sequence Diagrams</div>
+      </div>
+      <p class="section-desc">
+        Sequence diagrams illustrate the step-by-step interactions between the user,
+        the Angular frontend, and the Spring Boot backend for the main platform workflows.
+      </p>
+
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Authentication Sequence</span>
+          <span class="diagram-tag">Sequence</span>
+        </div>
+        <div class="diagram-img-wrap">
+          <img src="diagrams/seq-auth.svg" alt="Authentication Sequence Diagram"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="placeholder" style="display:none;">
+            <div class="placeholder-icon">🔐</div>
+            <div class="placeholder-text">seq-auth.png</div>
+            <div class="placeholder-hint">/diagrams/seq-auth.png</div>
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 8 — Authentication Sequence Diagram</div>
+      </div>
+
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Employee Onboarding Sequence</span>
+          <span class="diagram-tag">Sequence</span>
+        </div>
+        <div class="diagram-img-wrap">
+          <img src="diagrams/seq-onboarding.svg" alt="Onboarding Sequence Diagram"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="placeholder" style="display:none;">
+            <div class="placeholder-icon">📧</div>
+            <div class="placeholder-text">seq-onboarding.png</div>
+            <div class="placeholder-hint">/diagrams/seq-onboarding.png</div>
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 9 — Employee Onboarding Sequence Diagram</div>
+      </div>
+
+      <div class="diagram-grid">
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">Leave Request Sequence</span>
+            <span class="diagram-tag">Sequence</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/seq-leave.png" alt="Leave Request Sequence"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">📋</div>
+              <div class="placeholder-text">seq-leave.png</div>
+              <div class="placeholder-hint">/diagrams/seq-leave.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 10 — Leave Request Sequence</div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">Attendance Tracking Sequence</span>
+            <span class="diagram-tag">Sequence</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/seq-attendance.png" alt="Attendance Sequence"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">⏱️</div>
+              <div class="placeholder-text">seq-attendance.png</div>
+              <div class="placeholder-hint">/diagrams/seq-attendance.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 11 — Attendance Tracking Sequence</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Architecture -->
+    <section class="section" id="arch">
+      <div class="section-header">
+        <div class="section-number">5</div>
+        <div class="section-title">System Architecture</div>
+      </div>
+      <p class="section-desc">
+        The Nexus HCM platform follows a three-tier client-server architecture,
+        with Angular 19 on the frontend, Spring Boot 4 on the backend,
+        and MySQL as the relational database.
+      </p>
+
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Three-Tier Architecture Diagram</span>
+          <span class="diagram-tag">Architecture</span>
+        </div>
+        <div class="diagram-img-wrap">
+          <img src="diagrams/architecture.svg" alt="System Architecture"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="placeholder" style="display:none;">
+            <div class="placeholder-icon">🏗️</div>
+            <div class="placeholder-text">architecture.png</div>
+            <div class="placeholder-hint">/diagrams/architecture.png</div>
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 12 — Nexus HCM Three-Tier Architecture</div>
+      </div>
+
+      <div class="diagram-grid">
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">Backend Layer Diagram</span>
+            <span class="diagram-tag">Architecture</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/arch-backend.png" alt="Backend Architecture"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">⚙️</div>
+              <div class="placeholder-text">arch-backend.png</div>
+              <div class="placeholder-hint">/diagrams/arch-backend.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 13 — Backend Layered Architecture</div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="diagram-card-header">
+            <span class="diagram-card-title">Frontend Component Structure</span>
+            <span class="diagram-tag">Architecture</span>
+          </div>
+          <div class="diagram-img-wrap">
+            <img src="diagrams/arch-frontend.png" alt="Frontend Architecture"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="placeholder" style="display:none;">
+              <div class="placeholder-icon">🎨</div>
+              <div class="placeholder-text">arch-frontend.png</div>
+              <div class="placeholder-hint">/diagrams/arch-frontend.png</div>
+            </div>
+          </div>
+          <div class="diagram-caption">Figure 14 — Frontend Component Structure</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="page-footer">
+    Nexus HCM &nbsp;·&nbsp; Chapter 2: System Design &amp; Conception &nbsp;·&nbsp;
+    GHARIANI Mohamed Amine &nbsp;·&nbsp; ADP ES Tunisie &nbsp;·&nbsp; 2025
+  </footer>
+
+</body>
+</html>

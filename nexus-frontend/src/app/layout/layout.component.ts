@@ -9,94 +9,131 @@ import { NotificationService } from '../services/notification.service';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
   template: `
     <div class="app-layout">
-      <!-- Enterprise Header -->
       <header class="adp-header">
         <div class="logo-section">
-          <div class="adp-logo-css">ADP</div>
+          <div class="adp-logo-badge">ADP</div>
+          <div class="logo-divider"></div>
           <span class="app-title">Nexus HCM</span>
         </div>
         <nav class="main-nav">
-          <ul>
-            <li><a [routerLink]="dashboardLink" routerLinkActive="active">Dashboard</a></li>
-            <li *ngIf="isAdmin"><a routerLink="/employees" routerLinkActive="active">Employees</a></li>
-            <li *ngIf="isManager"><a routerLink="/my-dashboard" routerLinkActive="active">My Profile</a></li>
-          </ul>
+          <a [routerLink]="dashboardLink" routerLinkActive="active">Dashboard</a>
+          <a *ngIf="isAdmin" routerLink="/employees" routerLinkActive="active">Employees</a>
+          <a *ngIf="isManager" routerLink="/my-dashboard" routerLinkActive="active">My Profile</a>
         </nav>
-        <div class="user-actions">
-          <div class="user-profile">
-            <span class="user-name">{{ userName }}</span>
+        <div class="user-section">
+          <div class="user-info">
             <div class="avatar">{{ userInitial }}</div>
-            <button class="logout-btn" (click)="logout()">Sign Out</button>
+            <div class="user-details">
+              <span class="user-name">{{ userName }}</span>
+              <span class="user-role">{{ userRole }}</span>
+            </div>
           </div>
+          <button class="logout-btn" (click)="logout()">Sign Out</button>
         </div>
       </header>
 
-      <!-- Main Body -->
       <main class="main-content">
         <div class="content-limiter">
           <router-outlet></router-outlet>
         </div>
       </main>
 
-      <!-- Toast Notification -->
-      <div class="notification-toast" *ngIf="notification$ | async as note" [class.show]="note.show" [ngClass]="note.type">
-        <div class="toast-content">
-          <span class="toast-icon">
-            <i *ngIf="note.type === 'success'">✓</i>
-            <i *ngIf="note.type === 'error'">!</i>
-            <i *ngIf="note.type === 'info'">i</i>
-          </span>
-          <span class="toast-message">{{ note.message }}</span>
-          <button class="toast-close" (click)="hideNotification()">×</button>
+      <div class="toast" *ngIf="notification$ | async as note" [class.show]="note.show" [ngClass]="note.type">
+        <div class="toast-icon-wrap">
+          <span *ngIf="note.type === 'success'">✓</span>
+          <span *ngIf="note.type === 'error'">✕</span>
+          <span *ngIf="note.type === 'info'">i</span>
         </div>
+        <span class="toast-msg">{{ note.message }}</span>
+        <button class="toast-close" (click)="hideNotification()">×</button>
       </div>
 
-      <!-- Footer -->
       <footer class="adp-footer">
-        <div class="footer-limiter">
-          <p>&copy; 2026 Automatic Data Processing, Inc. | Nexus HCM Platform</p>
-          <div class="footer-links">
-            <a>Privacy Policy</a>
-            <a>Terms of Service</a>
-            <a>HR Support Desk</a>
-          </div>
+        <span>© 2025 ADP ES Tunisie · Nexus HCM Platform</span>
+        <div class="footer-links">
+          <a>Privacy Policy</a>
+          <a>Terms of Service</a>
+          <a>HR Support</a>
         </div>
       </footer>
     </div>
   `,
   styles: [`
     .app-layout { display: flex; flex-direction: column; min-height: 100vh; background: var(--adp-light-gray); }
-    .adp-header { background-color: var(--adp-white); border-bottom: 3px solid var(--adp-red); padding: 0 2rem; height: 70px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
-    .logo-section { display: flex; align-items: center; gap: 1.5rem; }
-    .adp-logo-css { background-color: var(--adp-red); color: white; font-weight: 900; font-size: 1.2rem; padding: 0.2rem 0.6rem; border-radius: 2px; letter-spacing: -1px; }
-    .app-title { font-weight: 700; font-size: 1.3rem; color: var(--adp-charcoal); border-left: 2px solid var(--adp-border); padding-left: 1.5rem; }
-    .main-nav ul { display: flex; list-style: none; gap: 2.5rem; margin: 0;}
-    .main-nav a { color: var(--adp-dark-gray); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; padding: 1.5rem 0; text-decoration: none; border-bottom: 3px solid transparent; transition: 0.2s;}
-    .main-nav a:hover, .main-nav a.active { color: var(--adp-red); border-bottom-color: var(--adp-red); }
-    .user-profile { display: flex; align-items: center; gap: 1rem; }
-    .user-name { font-size: 0.9rem; font-weight: 600; }
-    .avatar { background-color: var(--adp-dark-gray); color: white; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .logout-btn { margin-left: 1rem; background: transparent; border: 1.5px solid var(--adp-red); color: var(--adp-red); padding: 0.4rem 1rem; border-radius: 4px; font-weight: 600; cursor: pointer; }
-    .logout-btn:hover { background: var(--adp-red); color: white; }
-    .main-content { flex: 1; display: flex; justify-content: center; padding: 2rem; }
-    .content-limiter { width: 100%; max-width: 1280px; }
-    .adp-footer { background-color: var(--adp-charcoal); color: white; padding: 1.5rem 2rem; font-size: 0.85rem; }
-    .footer-limiter { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+
+    .adp-header {
+      background: white;
+      border-bottom: 1px solid var(--adp-border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      position: sticky; top: 0; z-index: 100;
+    }
+
+    .logo-section { display: flex; align-items: center; gap: 1rem; }
+    .adp-logo-badge { background: var(--adp-red); color: white; font-weight: 900; font-size: 1rem; padding: 0.3rem 0.65rem; border-radius: 6px; letter-spacing: -0.5px; }
+    .logo-divider { width: 1px; height: 24px; background: var(--adp-border); }
+    .app-title { font-weight: 700; font-size: 1.1rem; color: var(--adp-charcoal); }
+
+    .main-nav { display: flex; gap: 0.25rem; }
+    .main-nav a {
+      color: var(--adp-dark-gray);
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .main-nav a:hover { color: var(--adp-red); background: var(--adp-red-light); }
+    .main-nav a.active { color: var(--adp-red); background: var(--adp-red-light); }
+
+    .user-section { display: flex; align-items: center; gap: 1rem; }
+    .user-info { display: flex; align-items: center; gap: 0.75rem; }
+    .avatar { background: linear-gradient(135deg, var(--adp-red), #ff6b6b); color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-size: 0.85rem; font-weight: 700; color: var(--adp-charcoal); line-height: 1.2; }
+    .user-role { font-size: 0.7rem; color: var(--adp-dark-gray); text-transform: uppercase; letter-spacing: 0.05em; }
+    .logout-btn { background: transparent; border: 1.5px solid var(--adp-border); color: var(--adp-dark-gray); padding: 0.4rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .logout-btn:hover { border-color: var(--adp-red); color: var(--adp-red); background: var(--adp-red-light); }
+
+    .main-content { flex: 1; padding: 2rem; }
+    .content-limiter { max-width: 1280px; margin: 0 auto; }
+
+    .adp-footer { background: var(--adp-charcoal); color: rgba(255,255,255,0.6); padding: 1.25rem 2rem; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
     .footer-links { display: flex; gap: 1.5rem; }
-    
-    /* Notification Toast Styles */
-    .notification-toast { position: fixed; top: 20px; right: -400px; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; background: white; transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid var(--adp-red); min-width: 300px;}
-    .notification-toast.show { right: 20px; }
-    .notification-toast.success { border-left-color: #137333; }
-    .notification-toast.error { border-left-color: var(--adp-red); }
-    .notification-toast.info { border-left-color: #1967D2; }
-    .toast-content { display: flex; align-items: center; gap: 1rem; }
-    .toast-icon { font-style: normal; font-weight: bold; font-size: 1.2rem; }
-    .success .toast-icon { color: #137333; }
-    .error .toast-icon { color: var(--adp-red); }
-    .info .toast-icon { color: #1967D2; }
-    .toast-message { font-size: 0.9rem; color: var(--adp-charcoal); font-weight: 500; }
-    .toast-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--adp-dark-gray); margin-left: auto; }
+    .footer-links a { color: rgba(255,255,255,0.5); cursor: pointer; transition: color 0.2s; }
+    .footer-links a:hover { color: white; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: -420px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      min-width: 320px; max-width: 400px;
+      z-index: 9999;
+      transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-left: 4px solid var(--adp-red);
+    }
+    .toast.show { right: 24px; }
+    .toast.success { border-left-color: #16a34a; }
+    .toast.error { border-left-color: var(--adp-red); }
+    .toast.info { border-left-color: var(--adp-blue); }
+    .toast-icon-wrap { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+    .success .toast-icon-wrap { background: #dcfce7; color: #16a34a; }
+    .error .toast-icon-wrap { background: #fee2e2; color: var(--adp-red); }
+    .info .toast-icon-wrap { background: #dbeafe; color: var(--adp-blue); }
+    .toast-msg { font-size: 0.875rem; font-weight: 500; color: var(--adp-charcoal); flex: 1; }
+    .toast-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #94a3b8; line-height: 1; padding: 0; }
+    .toast-close:hover { color: var(--adp-charcoal); }
   `]
 })
 export class LayoutComponent implements OnInit {
@@ -104,6 +141,7 @@ export class LayoutComponent implements OnInit {
   isManager: boolean = false;
   userName: string = 'User';
   userInitial: string = 'U';
+  userRole: string = '';
   dashboardLink: string = '/dashboard';
   notification$;
 
@@ -117,13 +155,8 @@ export class LayoutComponent implements OnInit {
     this.isManager = role === 'MANAGER';
     this.userName = localStorage.getItem('adp_user') || 'User';
     this.userInitial = this.userName.charAt(0).toUpperCase();
-
-    if (role === 'EMPLOYEE' || role === 'MANAGER') {
-       // Note: For managers, dashboardLink points to Manager Console, but they have a separate "My Profile" link
-       this.dashboardLink = role === 'MANAGER' ? '/manager-dashboard' : '/my-dashboard';
-    } else {
-       this.dashboardLink = '/dashboard';
-    }
+    this.userRole = (role || '').replace('_', ' ');
+    this.dashboardLink = role === 'MANAGER' ? '/manager-dashboard' : role === 'EMPLOYEE' ? '/my-dashboard' : '/dashboard';
   }
 
   hideNotification() {

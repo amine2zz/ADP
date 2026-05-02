@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 580" font-family="Inter, Segoe UI, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1a1a2e"/></marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#D0271D"/></marker>
+  </defs>
+  <rect width="1000" height="580" fill="#ffffff"/>
+  <text x="500" y="34" text-anchor="middle" font-size="17" font-weight="800" fill="#1a1a2e">Sequence Diagram — Employee Onboarding</text>
+  <line x1="80" y1="44" x2="920" y2="44" stroke="#D0271D" stroke-width="2"/>
+
+  <!-- Headers -->
+  <rect x="20" y="60" width="100" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="70" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">HR Admin</text>
+
+  <rect x="170" y="60" width="130" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="235" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">EmployeeCtrl</text>
+
+  <rect x="350" y="60" width="130" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="415" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">EmployeeService</text>
+
+  <rect x="530" y="60" width="120" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="590" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">EmailService</text>
+
+  <rect x="700" y="60" width="100" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="750" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Database</text>
+
+  <rect x="850" y="60" width="110" height="36" rx="6" fill="#1a1a2e"/>
+  <text x="905" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Employee</text>
+
+  <!-- Lifelines -->
+  <line x1="70"  y1="96" x2="70"  y2="560" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="235" y1="96" x2="235" y2="560" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="415" y1="96" x2="415" y2="560" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="590" y1="96" x2="590" y2="560" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="750" y1="96" x2="750" y2="560" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="905" y1="96" x2="905" y2="560" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- Activation boxes -->
+  <rect x="63"  y="130" width="14" height="80"  fill="#D0271D" opacity="0.15"/>
+  <rect x="228" y="145" width="14" height="200" fill="#1967D2" opacity="0.15"/>
+  <rect x="408" y="160" width="14" height="180" fill="#137333" opacity="0.15"/>
+  <rect x="583" y="230" width="14" height="60"  fill="#E65100" opacity="0.15"/>
+  <rect x="743" y="175" width="14" height="80"  fill="#64748b" opacity="0.15"/>
+  <rect x="898" y="360" width="14" height="120" fill="#6A1B9A" opacity="0.15"/>
+
+  <!-- Step 1 -->
+  <line x1="77" y1="140" x2="228" y2="140" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="150" y="134" text-anchor="middle" font-size="10" fill="#1a1a2e">POST /api/employees</text>
+
+  <!-- Step 2 -->
+  <line x1="242" y1="165" x2="408" y2="165" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="320" y="159" text-anchor="middle" font-size="10" fill="#1a1a2e">createEmployee(data)</text>
+
+  <!-- Step 3: generate token -->
+  <line x1="415" y1="190" x2="415" y2="215" stroke="#1a1a2e" stroke-width="1.5"/>
+  <rect x="380" y="215" width="70" height="28" rx="4" fill="#F8F9FA" stroke="#E2E8F0"/>
+  <text x="415" y="233" text-anchor="middle" font-size="9" fill="#1a1a2e">UUID token</text>
+
+  <!-- Step 4: save to DB -->
+  <line x1="422" y1="255" x2="743" y2="255" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="580" y="249" text-anchor="middle" font-size="10" fill="#1a1a2e">save(employee)</text>
+  <line x1="743" y1="275" x2="422" y2="275" stroke="#D0271D" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="580" y="269" text-anchor="middle" font-size="10" fill="#D0271D">saved employee</text>
+
+  <!-- Step 5: send email -->
+  <line x1="422" y1="300" x2="583" y2="300" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="500" y="294" text-anchor="middle" font-size="10" fill="#1a1a2e">sendSetupEmail(email, token)</text>
+  <line x1="590" y1="320" x2="590" y2="345" stroke="#1a1a2e" stroke-width="1.5"/>
+  <rect x="555" y="345" width="70" height="28" rx="4" fill="#F8F9FA" stroke="#E2E8F0"/>
+  <text x="590" y="363" text-anchor="middle" font-size="9" fill="#1a1a2e">SMTP dispatch</text>
+
+  <!-- Step 6: return to HR Admin -->
+  <line x1="228" y1="390" x2="77" y2="390" stroke="#D0271D" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="150" y="384" text-anchor="middle" font-size="10" fill="#D0271D">201 Created</text>
+
+  <!-- Step 7: Employee clicks link -->
+  <line x1="905" y1="420" x2="228" y2="420" stroke="#6A1B9A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="560" y="414" text-anchor="middle" font-size="10" fill="#6A1B9A">GET /setup-account?token=...</text>
+
+  <!-- Step 8: POST setup -->
+  <line x1="905" y1="450" x2="228" y2="450" stroke="#6A1B9A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="560" y="444" text-anchor="middle" font-size="10" fill="#6A1B9A">POST /api/employees/setup</text>
+
+  <!-- Step 9: activate -->
+  <line x1="242" y1="475" x2="408" y2="475" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="320" y="469" text-anchor="middle" font-size="10" fill="#1a1a2e">setupAccount(token, pwd...)</text>
+
+  <!-- Step 10: update DB -->
+  <line x1="422" y1="500" x2="743" y2="500" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="580" y="494" text-anchor="middle" font-size="10" fill="#1a1a2e">status=ACTIVE, token=null</text>
+
+  <!-- Step 11: redirect -->
+  <line x1="228" y1="530" x2="898" y2="530" stroke="#D0271D" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="560" y="524" text-anchor="middle" font-size="10" fill="#D0271D">redirect to /login</text>
+</svg>
