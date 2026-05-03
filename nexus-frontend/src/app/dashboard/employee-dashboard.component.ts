@@ -65,8 +65,8 @@ import { FormsModule } from '@angular/forms';
         <div class="kpi-card" style="--accent: #1967D2">
           <div class="kpi-icon" style="background:#dbeafe; color:#1967D2">📅</div>
           <div>
-            <div class="kpi-title">My Annual Leave</div>
-            <div class="kpi-value">📅 {{ employeeData?.leaveBalance?.toFixed(1) || '0.0' }}d</div>
+            <div class="kpi-title">📅 My Annual Leave</div>
+            <div class="kpi-value">{{ employeeData?.leaveBalance?.toFixed(1) || '0.0' }}d</div>
             <div class="kpi-trend">
               <strong style="color: #1967D2;">{{ employeeData?.category?.name || 'Standard' }} Policy</strong>
               <div *ngIf="employeeData?.category" style="font-size:0.75rem; margin-top:0.25rem;">
@@ -81,8 +81,8 @@ import { FormsModule } from '@angular/forms';
         <div class="kpi-card" style="--accent: #ef4444">
           <div class="kpi-icon" style="background:#fee2e2; color:#ef4444">💊</div>
           <div>
-            <div class="kpi-title">Sick Leave Bank</div>
-            <div class="kpi-value">💊 {{ employeeData?.sickLeaveBalance?.toFixed(1) || '0.0' }}d</div>
+            <div class="kpi-title">💊 Sick Leave Bank</div>
+            <div class="kpi-value">{{ employeeData?.sickLeaveBalance?.toFixed(1) || '0.0' }}d</div>
             <div class="kpi-trend">Remaining balance</div>
           </div>
         </div>

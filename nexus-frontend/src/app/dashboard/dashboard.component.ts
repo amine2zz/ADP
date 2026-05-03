@@ -2,6 +2,7 @@ import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { NotificationService } from '../services/notification.service';
 
 @Pipe({ name: 'mapDepts', standalone: true })
 export class MapDeptsPipe implements PipeTransform {
@@ -37,9 +38,9 @@ export class KeyValuesPipe implements PipeTransform {
       <!-- Tab Switcher -->
       <div class="card" style="padding: 1rem; margin-top: 1rem;">
         <div class="tabs" style="display: flex; gap: 2rem; border-bottom: 1px solid var(--adp-border);">
+          <button (click)="setTab('attendance')" [style.border-bottom]="currentTab === 'attendance' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Attendance</button>
           <button (click)="setTab('overview')" [style.border-bottom]="currentTab === 'overview' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">System Overview</button>
           <button (click)="setTab('leaves')" [style.border-bottom]="currentTab === 'leaves' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Leaves</button>
-          <button (click)="setTab('attendance')" [style.border-bottom]="currentTab === 'attendance' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Attendance</button>
           <button (click)="setTab('policies')" [style.border-bottom]="currentTab === 'policies' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Leave Policies</button>
         </div>
       </div>
@@ -191,7 +192,8 @@ export class KeyValuesPipe implements PipeTransform {
                   </div>
                   <div style="display: flex; gap: 0.5rem; overflow-x: auto;">
                     <div *ngFor="let day of weekDays" 
-                         style="min-width: 80px; height: 44px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800; padding: 2px; transition: transform 0.1s;"
+                         (click)="openAttendanceEditor(emp, day)"
+                         style="min-width: 80px; height: 44px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800; padding: 2px; transition: transform 0.1s; cursor: pointer;"
                          [style.background]="day.isWeekend ? '#f1f5f9' : getDayColor(emp.id, day.date)"
                          [style.color]="day.isWeekend ? '#64748b' : 'white'"
                          [style.border]="day.isWeekend ? '1px dashed var(--adp-border)' : 'none'"
@@ -201,6 +203,38 @@ export class KeyValuesPipe implements PipeTransform {
                     </div>
                   </div>
                </div>
+            </div>
+          </div>
+
+          <div *ngIf="attendanceEditModalVisible" class="modal-overlay" (click)="attendanceEditModalVisible = false">
+            <div class="modal-card" (click)="$event.stopPropagation()">
+              <h3 style="margin-bottom: 1rem;">Edit Attendance for {{ editAttendanceRecord.employee.firstName }} {{ editAttendanceRecord.employee.lastName }} on {{ editAttendanceRecord.workDate }}</h3>
+              <div class="modal-body">
+                <div class="form-grid">
+                  <label>Date</label>
+                  <input type="text" [value]="editAttendanceRecord.workDate" readonly style="background:#f1f5f9; cursor:not-allowed;" />
+                  <label>Morning In</label>
+                  <input type="time" [(ngModel)]="attendanceEditPayload.morningIn">
+                  <label>Lunch Out</label>
+                  <input type="time" [(ngModel)]="attendanceEditPayload.lunchOut">
+                  <label>Afternoon In</label>
+                  <input type="time" [(ngModel)]="attendanceEditPayload.afternoonIn">
+                  <label>Evening Out</label>
+                  <input type="time" [(ngModel)]="attendanceEditPayload.eveningOut">
+                  <label>Status</label>
+                  <select [(ngModel)]="attendanceEditPayload.status">
+                    <option value="ABSENT">ABSENT</option>
+                    <option value="MORNING_IN">MORNING_IN</option>
+                    <option value="LUNCH_OUT">LUNCH_OUT</option>
+                    <option value="AFTERNOON_IN">AFTERNOON_IN</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                  </select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn-primary" (click)="saveAttendanceEdit()">Save</button>
+                <button class="btn-secondary" (click)="attendanceEditModalVisible = false">Cancel</button>
+              </div>
             </div>
           </div>
         </div>
@@ -312,6 +346,74 @@ export class KeyValuesPipe implements PipeTransform {
     .status-badge { padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600;}
     .status-badge.active { background: #E6F4EA; color: #137333; }
     .fade-in { animation: fadeIn 0.4s ease; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 1.5rem 0.75rem;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.75rem;
+      width: min(90vw, 520px);
+      max-height: calc(100vh - 3rem);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    .modal-body {
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 0.25rem;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-shrink: 0;
+      background: white;
+      padding-top: 0.75rem;
+    }
+    .modal-card .form-grid {
+      min-width: 0;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .form-grid label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+    }
+    .form-grid input,
+    .form-grid select {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.75rem;
+      background: #f8fafc;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    .btn-secondary {
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      background: #e2e8f0;
+      border: none;
+      color: #334155;
+      cursor: pointer;
+    }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   `]
 })
@@ -328,10 +430,13 @@ export class MainDashboardComponent implements OnInit {
   categories: any[] = [];
   selectedCategory: any = null;
   policyForm: any = { name: '', annualLeaveAllowance: null, monthlyIncrement: null, description: '' };
+  attendanceEditModalVisible: boolean = false;
+  editAttendanceRecord: any = null;
+  attendanceEditPayload: any = { morningIn: '', lunchOut: '', afternoonIn: '', eveningOut: '', status: '' };
   weekDays: any[] = [];
   navigationDate: Date = new Date();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private notifService: NotificationService) {}
 
   ngOnInit() {
     const savedTab = localStorage.getItem('adp_dash_tab');
@@ -414,24 +519,134 @@ export class MainDashboardComponent implements OnInit {
       const dayDef = this.weekDays.find(d => d.date === dateStr);
       if (dayDef?.isWeekend) return { status: 'weekend' };
 
-      let totalMins = 0;
-      let hasClockIn = false;
-      for (const att of this.attendanceData) {
-          if (att.employee?.id === empId && att.checkIn && att.checkIn.startsWith(dateStr)) {
-              hasClockIn = true;
-              if (att.checkOut) {
-                  const cin = new Date(att.checkIn).getTime();
-                  const cout = new Date(att.checkOut).getTime();
-                  totalMins += Math.floor((cout - cin) / 60000);
+      const attendance = this.findAttendanceRecord(empId, dateStr);
+      if (attendance) {
+          const morningIn = attendance.morningIn ? new Date(attendance.morningIn) : null;
+          const lunchOut = attendance.lunchOut ? new Date(attendance.lunchOut) : null;
+          const afternoonIn = attendance.afternoonIn ? new Date(attendance.afternoonIn) : null;
+          const eveningOut = attendance.eveningOut ? new Date(attendance.eveningOut) : null;
+
+          if (morningIn && eveningOut) {
+              let totalMs = eveningOut.getTime() - morningIn.getTime();
+              if (lunchOut && afternoonIn) {
+                  totalMs -= Math.max(0, afternoonIn.getTime() - lunchOut.getTime());
               }
+              const hrs = Math.floor(totalMs / 3600000);
+              const mins = Math.floor((totalMs % 3600000) / 60000);
+              return { status: 'worked', hrs, mins };
+          }
+          if (morningIn) {
+              return { status: 'partial' };
           }
       }
-      if (hasClockIn) {
-          const hrs = Math.floor(totalMins / 60);
-          const mins = totalMins % 60;
-          return { status: 'worked', hrs, mins };
-      }
       return dateStr > new Date().toISOString().split('T')[0] ? { status: 'future' } : { status: 'absent' };
+  }
+
+  findAttendanceRecord(empId: number, dateStr: string) {
+      return this.attendanceData.find((att: any) => att.employee?.id === empId && att.workDate === dateStr);
+  }
+
+  formatTime(value: any) {
+      if (!value) return '';
+      const pad = (n: number) => String(n).padStart(2, '0');
+      if (typeof value === 'string') {
+          const [, timePart] = value.split('T');
+          if (!timePart) return '';
+          const [hours = '00', minutes = '00'] = timePart.split(':');
+          return `${pad(Number(hours))}:${pad(Number(minutes))}`;
+      }
+      const date = value instanceof Date ? value : new Date(value);
+      return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  buildDateTime(dateStr: string, timeValue: string) {
+      if (!timeValue) return undefined;
+      return `${dateStr}T${timeValue}:00`;
+  }
+
+  validateAttendanceTimeOrder() {
+      const sequence = [
+          { label: 'Morning In', time: this.attendanceEditPayload.morningIn },
+          { label: 'Lunch Out', time: this.attendanceEditPayload.lunchOut },
+          { label: 'Afternoon In', time: this.attendanceEditPayload.afternoonIn },
+          { label: 'Evening Out', time: this.attendanceEditPayload.eveningOut }
+      ];
+      let lastDateTime: string | undefined;
+
+      for (const item of sequence) {
+          if (!item.time) {
+              continue;
+          }
+          const current = this.buildDateTime(this.editAttendanceRecord.workDate, item.time);
+          if (!current) {
+              continue;
+          }
+          if (lastDateTime && lastDateTime >= current) {
+              this.notifService.show(`${item.label} must be after the previous time.`, 'error');
+              return false;
+          }
+          lastDateTime = current;
+      }
+
+      return true;
+  }
+
+  openAttendanceEditor(emp: any, day: any) {
+      const existing = this.findAttendanceRecord(emp.id, day.date);
+      if (existing) {
+          this.editAttendanceRecord = existing;
+          this.attendanceEditPayload = {
+              morningIn: this.formatTime(existing.morningIn),
+              lunchOut: this.formatTime(existing.lunchOut),
+              afternoonIn: this.formatTime(existing.afternoonIn),
+              eveningOut: this.formatTime(existing.eveningOut),
+              status: existing.status || 'ABSENT'
+          };
+      } else {
+          this.editAttendanceRecord = { employee: emp, workDate: day.date };
+          this.attendanceEditPayload = { morningIn: '', lunchOut: '', afternoonIn: '', eveningOut: '', status: 'ABSENT' };
+      }
+      this.attendanceEditModalVisible = true;
+  }
+
+  saveAttendanceEdit() {
+      if (!this.editAttendanceRecord || !this.editAttendanceRecord.employee) {
+          return;
+      }
+
+      if (!this.validateAttendanceTimeOrder()) {
+          return;
+      }
+
+      const morningIn = this.buildDateTime(this.editAttendanceRecord.workDate, this.attendanceEditPayload.morningIn);
+      const lunchOut = this.buildDateTime(this.editAttendanceRecord.workDate, this.attendanceEditPayload.lunchOut);
+      const afternoonIn = this.buildDateTime(this.editAttendanceRecord.workDate, this.attendanceEditPayload.afternoonIn);
+      const eveningOut = this.buildDateTime(this.editAttendanceRecord.workDate, this.attendanceEditPayload.eveningOut);
+
+      const payload: any = {
+          employeeId: String(this.editAttendanceRecord.employee.id),
+          workDate: this.editAttendanceRecord.workDate,
+          status: this.attendanceEditPayload.status || undefined,
+          updatedBy: localStorage.getItem('adp_user') || 'SYSTEM'
+      };
+
+      if (morningIn) payload.morningIn = morningIn;
+      if (lunchOut) payload.lunchOut = lunchOut;
+      if (afternoonIn) payload.afternoonIn = afternoonIn;
+      if (eveningOut) payload.eveningOut = eveningOut;
+
+      const request = this.editAttendanceRecord.id
+          ? this.http.put(`http://localhost:8085/api/hr/attendance/${this.editAttendanceRecord.id}`, payload)
+          : this.http.post(`http://localhost:8085/api/hr/attendance`, payload);
+
+      request.subscribe({
+          next: () => {
+              this.notifService.show('Attendance saved successfully.', 'success');
+              this.attendanceEditModalVisible = false;
+              this.fetchData();
+          },
+          error: () => this.notifService.show('Failed to save attendance.', 'error')
+      });
   }
 
   getDayColor(empId: number, dateStr: string) {

@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class HRManagementService {
@@ -102,6 +103,60 @@ public class HRManagementService {
 
     public List<Attendance> getAllAttendance() {
         return attendanceRepository.findAll();
+    }
+
+    @Transactional
+    public Attendance saveAttendance(Map<String, String> payload) {
+        Attendance attendance = null;
+
+        if (payload.get("id") != null) {
+            attendance = attendanceRepository.findById(Long.parseLong(payload.get("id")))
+                    .orElseThrow(() -> new RuntimeException("Attendance not found"));
+        }
+
+        if (attendance == null) {
+            if (payload.get("employeeId") == null || payload.get("workDate") == null) {
+                throw new RuntimeException("Insufficient data to create attendance record");
+            }
+
+            Long employeeId = Long.parseLong(payload.get("employeeId"));
+            Employee employee = employeeRepository.findById(employeeId)
+                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+            LocalDate workDate = LocalDate.parse(payload.get("workDate"));
+            attendance = attendanceRepository.findByEmployeeIdAndWorkDate(employeeId, workDate)
+                    .orElseGet(() -> {
+                        Attendance a = new Attendance();
+                        a.setEmployee(employee);
+                        a.setWorkDate(workDate);
+                        return a;
+                    });
+        }
+
+        if (payload.get("morningIn") != null) {
+            attendance.setMorningIn(LocalDateTime.parse(payload.get("morningIn")));
+        }
+        if (payload.get("lunchOut") != null) {
+            attendance.setLunchOut(LocalDateTime.parse(payload.get("lunchOut")));
+        }
+        if (payload.get("afternoonIn") != null) {
+            attendance.setAfternoonIn(LocalDateTime.parse(payload.get("afternoonIn")));
+        }
+        if (payload.get("eveningOut") != null) {
+            attendance.setEveningOut(LocalDateTime.parse(payload.get("eveningOut")));
+        }
+        if (payload.get("status") != null) {
+            attendance.setStatus(payload.get("status"));
+        }
+
+        String updater = payload.getOrDefault("updatedBy", "SYSTEM");
+        logOperation(updater, "ATTENDANCE_UPDATED", attendance.getEmployee().getEmail(), "Attendance updated for " + attendance.getWorkDate());
+        return attendanceRepository.save(attendance);
+    }
+
+    @Transactional
+    public Attendance updateAttendance(Long attendanceId, Map<String, String> payload) {
+        payload.put("id", String.valueOf(attendanceId));
+        return saveAttendance(payload);
     }
 
     public LeaveRequest submitLeaveRequest(Employee employee, LeaveRequest request) {

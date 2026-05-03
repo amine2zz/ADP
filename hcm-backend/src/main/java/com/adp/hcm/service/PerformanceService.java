@@ -115,9 +115,13 @@ public class PerformanceService {
 
         // Fetch existing evaluations for the period
         Map<Long, PerformanceEvaluation> evalMap = new HashMap<>();
+        boolean periodLaunched = false;
         if (period != null) {
-            evaluationRepository.findByPeriodWithDetails(period)
-                .forEach(e -> evalMap.put(e.getEmployee().getId(), e));
+            List<PerformanceEvaluation> periodEvals = evaluationRepository.findByPeriodWithDetails(period);
+            if (!periodEvals.isEmpty()) {
+                periodLaunched = true;
+                periodEvals.forEach(e -> evalMap.put(e.getEmployee().getId(), e));
+            }
         }
 
         List<PerformanceReportDTO> reports = new ArrayList<>();
@@ -134,7 +138,7 @@ public class PerformanceService {
                 dto.setEmployeeName(emp.getFirstName() + " " + emp.getLastName());
                 dto.setDepartmentName(emp.getDepartment() != null ? emp.getDepartment().getName() : "N/A");
                 dto.setPeriod(period);
-                dto.setStatus("PENDING");
+                dto.setStatus(periodLaunched ? "PENDING" : "NOT_LAUNCHED");
                 dto.setTotalWorkedHours(calculateWorkedHours(emp, period));
                 dto.setResponses(new ArrayList<>());
                 reports.add(dto);

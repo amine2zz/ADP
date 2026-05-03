@@ -52,4 +52,14 @@ public class HRController {
     public List<Attendance> getTeamAttendance(@PathVariable("id") Long id) {
         return hrService.getTeamAttendance(id);
     }
+
+    @PostMapping("/attendance")
+    public Attendance saveAttendance(@RequestBody Map<String, String> payload) {
+        return hrService.saveAttendance(payload);
+    }
+
+    @PutMapping("/attendance/{id}")
+    public Attendance updateAttendance(@PathVariable("id") Long id, @RequestBody Map<String, String> payload) {
+        return hrService.updateAttendance(id, payload);
+    }
 }

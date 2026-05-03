@@ -85,14 +85,15 @@ Chart.register(...registerables);
                 <td><strong>{{ report.totalWorkedHours }}h</strong></td>
                 <td>
                   <span class="badge" [class.badge-completed]="report.status === 'COMPLETED'" 
-                        [class.badge-pending]="report.status === 'PENDING'">
-                    {{ report.status }}
+                        [class.badge-pending]="report.status === 'PENDING'"
+                        [class.badge-notlaunched]="report.status === 'NOT_LAUNCHED'">
+                    {{ report.status === 'NOT_LAUNCHED' ? 'NOT LAUNCHED' : report.status }}
                   </span>
                 </td>
                 <td>
                   <button class="btn btn-sm btn-outline" (click)="viewDetails(report)">View Details</button>
                   <button class="btn btn-sm btn-primary" style="margin-left: 0.5rem" 
-                          *ngIf="userRole === 'MANAGER' && report.status !== 'COMPLETED'" 
+                          *ngIf="userRole === 'MANAGER' && report.status === 'PENDING'" 
                           (click)="startEvaluation(report)">
                     Evaluate
                   </button>
@@ -403,6 +404,7 @@ Chart.register(...registerables);
 
     .badge-pending { background: #fef9c3; color: #854d0e; }
     .badge-completed { background: #dcfce7; color: #166534; }
+    .badge-notlaunched { background: #e2e8f0; color: #1d4ed8; }
 
     .btn {
       padding: 0.6rem 1.2rem;
@@ -609,6 +611,11 @@ export class PerformanceReportComponent implements OnInit {
   }
 
   startEvaluation(report: any) {
+    if (report.status === 'NOT_LAUNCHED') {
+      this.notifService.show('This month has not been launched yet. Please ask HR to launch the survey first.', 'error');
+      return;
+    }
+
     // If it's a virtual report (no evaluationId), we create it first
     if (!report.evaluationId) {
       this.perfService.launchEvaluations(report.period).subscribe(() => {
