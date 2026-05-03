@@ -36,6 +36,14 @@ export class PerformanceService {
     return this.http.get<any[]>(url);
   }
 
+  getEmployeeHistory(employeeId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/history/employee/${employeeId}`);
+  }
+
+  getTeamHistory(managerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/history/team/${managerId}`);
+  }
+
   getDepartments(): Observable<any[]> {
     return this.http.get<any[]>('http://localhost:8085/api/departments');
   }

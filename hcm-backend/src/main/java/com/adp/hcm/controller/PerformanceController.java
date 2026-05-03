@@ -40,6 +40,16 @@ public class PerformanceController {
         return performanceService.launchMonthlyEvaluation(period);
     }
 
+    @GetMapping("/history/employee/{id}")
+    public List<PerformanceReportDTO> getEmployeeHistory(@PathVariable("id") Long employeeId) {
+        return performanceService.getEmployeeHistory(employeeId);
+    }
+
+    @GetMapping("/history/team/{managerId}")
+    public List<PerformanceReportDTO> getTeamHistory(@PathVariable("managerId") Long managerId) {
+        return performanceService.getTeamHistory(managerId);
+    }
+
     @GetMapping("/reports")
     public List<PerformanceReportDTO> getReports(
             @RequestParam(value = "deptId", required = false) Long deptId,

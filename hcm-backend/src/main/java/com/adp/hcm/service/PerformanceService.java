@@ -78,6 +78,26 @@ public class PerformanceService {
         return evaluationRepository.save(eval);
     }
 
+    public List<PerformanceReportDTO> getEmployeeHistory(Long employeeId) {
+        Employee emp = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new RuntimeException("Employee not found"));
+        return evaluationRepository.findByEmployee(emp).stream()
+            .map(this::mapToDTO)
+            .sorted(java.util.Comparator.comparing(PerformanceReportDTO::getPeriod))
+            .collect(Collectors.toList());
+    }
+
+    public List<PerformanceReportDTO> getTeamHistory(Long managerId) {
+        List<Employee> team = employeeRepository.findByManagerId(managerId);
+        List<PerformanceReportDTO> reports = new ArrayList<>();
+        for (Employee emp : team) {
+            reports.addAll(evaluationRepository.findByEmployee(emp).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList()));
+        }
+        return reports;
+    }
+
     public List<PerformanceReportDTO> generateReports(Long deptId, String period, Long managerId) {
         List<Employee> allEmployees;
         if (managerId != null) {

@@ -43,8 +43,8 @@ import { NotificationService } from '../services/notification.service';
       <!-- Tab Switcher -->
       <div class="card" style="padding: 1rem;">
         <div class="tabs" style="display: flex; gap: 2rem; border-bottom: 1px solid var(--adp-border);">
-          <button (click)="currentTab = 'team'" [style.border-bottom]="currentTab === 'team' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">My Team</button>
           <button (click)="currentTab = 'leaves'" [style.border-bottom]="currentTab === 'leaves' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Leave Requests</button>
+          <button (click)="currentTab = 'team'" [style.border-bottom]="currentTab === 'team' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">My Team</button>
           <button (click)="currentTab = 'attendance'" [style.border-bottom]="currentTab === 'attendance' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Attendance (Pointage)</button>
         </div>
       </div>
@@ -151,7 +151,7 @@ export class ManagerDashboardComponent implements OnInit {
   employeeData: any = {};
   subordinates: any[] = [];
   leaves: any[] = [];
-  currentTab: any = 'team';
+  currentTab: any = 'leaves';
   userId: any = null;
 
   constructor(

@@ -4,6 +4,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { PerformanceService } from '../services/performance.service';
 import { NotificationService } from '../services/notification.service';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-performance-report',
@@ -16,12 +19,15 @@ import { NotificationService } from '../services/notification.service';
         <p>Monitor employee ratings and worked hours</p>
       </header>
 
-      <div class="tabs" *ngIf="userRole === 'HR_ADMIN'">
-        <button [class.active]="activeTab === 'reports'" (click)="activeTab = 'reports'">
-          Performance Reports
+      <div class="tabs">
+        <button [class.active]="activeTab === 'analytics'" (click)="activeTab = 'analytics'; loadAnalytics()" *ngIf="userRole === 'MANAGER'">
+          Team Analytics
         </button>
-        <button [class.active]="activeTab === 'launch'" (click)="activeTab = 'launch'">
+        <button [class.active]="activeTab === 'launch'" (click)="activeTab = 'launch'" *ngIf="userRole === 'HR_ADMIN'">
           Launch Monthly Survey
+        </button>
+        <button [class.active]="activeTab === 'reports'" (click)="activeTab = 'reports'" *ngIf="userRole === 'HR_ADMIN' || userRole === 'MANAGER'">
+          Performance Reports
         </button>
       </div>
 
@@ -105,18 +111,36 @@ import { NotificationService } from '../services/notification.service';
         </div>
       </div>
 
-      <!-- Tab Content: Launch -->
-      <div *ngIf="activeTab === 'launch'" class="tab-content">
-        <div class="card launch-card">
-          <h2>Launch New Monthly Evaluation</h2>
-          <p>This will generate pending evaluations for all employees to be completed by their managers.</p>
-          <div class="launch-form">
-            <div class="input-group">
-              <label>Target Period</label>
-              <input type="month" [(ngModel)]="launchPeriod">
-            </div>
-            <button class="btn btn-hero" (click)="launchMonthly()">Initialize Survey</button>
+      <!-- Tab Content: Analytics -->
+      <div *ngIf="activeTab === 'analytics'" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h3>Overall Team Performance Over Time</h3>
           </div>
+          <div style="height: 400px; width: 100%;">
+            <canvas id="teamChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Launch -->
+      <div *ngIf="activeTab === 'launch'" class="tab-content" style="display: flex; justify-content: center; padding-top: 2rem;">
+        <div class="card launch-card" style="max-width: 500px; width: 100%; text-align: center; padding: 3rem 2rem;">
+          <div style="background: #eef2ff; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+            <span style="font-size: 2.5rem;">🚀</span>
+          </div>
+          <h2 style="font-size: 1.75rem; color: #1e293b; margin-bottom: 0.5rem; font-weight: 800;">Launch Evaluation</h2>
+          <p style="color: #64748b; margin-bottom: 2rem; line-height: 1.5;">Initialize the performance tracking period. This will generate pending evaluations for all employees.</p>
+          
+          <div style="background: #f8fafc; padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; text-align: left; border: 1px solid #e2e8f0;">
+            <label style="display: block; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Target Period</label>
+            <input type="month" [(ngModel)]="launchPeriod" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 1.1rem; font-family: inherit; color: #1e293b; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
+          </div>
+          
+          <button class="btn btn-hero" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);" (click)="launchMonthly()">
+            <span>Initialize Survey Now</span>
+            <span style="font-size: 1.2rem;">→</span>
+          </button>
         </div>
       </div>
     </div>
@@ -175,6 +199,13 @@ import { NotificationService } from '../services/notification.service';
                     <span class="rating-label">{{ res.rating }}</span>
                     <span class="rating-val">({{ res.ratingValue }}/5)</span>
                 </div>
+            </div>
+        </div>
+        
+        <div class="history-chart" style="margin-top: 2rem;">
+            <h3>Performance History</h3>
+            <div style="height: 250px; width: 100%;">
+                <canvas id="empChart"></canvas>
             </div>
         </div>
       </div>
@@ -533,7 +564,11 @@ export class PerformanceReportComponent implements OnInit {
       } catch (e) {}
     }
 
-    if (this.userRole === 'MANAGER') this.activeTab = 'reports';
+    if (this.userRole === 'MANAGER') {
+      this.activeTab = 'analytics';
+    } else if (this.userRole === 'HR_ADMIN') {
+      this.activeTab = 'launch';
+    }
 
     this.loadInitialData();
   }
@@ -545,6 +580,8 @@ export class PerformanceReportComponent implements OnInit {
       this.perfService.getPendingEvaluations(this.currentUser.id).subscribe(ev => {
         this.pendingEvaluations = ev;
       });
+      // Load analytics if that's the default tab
+      this.loadAnalytics();
     }
 
     this.loadReports();
@@ -577,8 +614,12 @@ export class PerformanceReportComponent implements OnInit {
       this.perfService.launchEvaluations(report.period).subscribe(() => {
         // After launching, we find the real evaluationId
         this.perfService.getPendingEvaluations(this.currentUser.id).subscribe(evs => {
-          const realEval = evs.find(e => e.employee.id === report.employeeId);
-          if (realEval) this.openSurvey(realEval);
+          const realEval = evs.find(e => e.employee.id === report.employeeId && e.period === report.period);
+          if (realEval) {
+            this.openSurvey(realEval);
+          } else {
+            this.notifService.show('Failed to load the new evaluation', 'error');
+          }
         });
       });
     } else {
@@ -641,8 +682,84 @@ export class PerformanceReportComponent implements OnInit {
     return 'text-danger';
   }
 
+  empChartInstance: any;
   viewDetails(report: any) {
     this.selectedReport = report;
+    
+    // Fetch employee history and draw chart
+    this.perfService.getEmployeeHistory(report.employeeId).subscribe(history => {
+      const labels = history.map((h: any) => h.period).sort();
+      const data = history.map((h: any) => h.averageRating || 0);
+      
+      setTimeout(() => {
+        const ctx = document.getElementById('empChart') as HTMLCanvasElement;
+        if (!ctx) return;
+        if (this.empChartInstance) this.empChartInstance.destroy();
+        
+        this.empChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Average Rating (out of 5)',
+                    data: data,
+                    backgroundColor: '#7c3aed',
+                    borderRadius: 4
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { y: { beginAtZero: true, max: 5 } } 
+            }
+        });
+      }, 100);
+    });
+  }
+
+  teamChartInstance: any;
+  loadAnalytics() {
+    this.perfService.getTeamHistory(this.currentUser.id).subscribe(history => {
+      const periodMap = new Map<string, {total: number, count: number}>();
+      history.forEach((h: any) => {
+          if (!h.averageRating) return;
+          const p = h.period;
+          if (!periodMap.has(p)) periodMap.set(p, {total: 0, count: 0});
+          periodMap.get(p)!.total += h.averageRating;
+          periodMap.get(p)!.count++;
+      });
+      
+      const labels = Array.from(periodMap.keys()).sort();
+      const data = labels.map(l => periodMap.get(l)!.total / periodMap.get(l)!.count);
+
+      setTimeout(() => {
+          const ctx = document.getElementById('teamChart') as HTMLCanvasElement;
+          if (!ctx) return;
+          if (this.teamChartInstance) this.teamChartInstance.destroy();
+          
+          this.teamChartInstance = new Chart(ctx, {
+              type: 'line',
+              data: {
+                  labels: labels,
+                  datasets: [{
+                      label: 'Average Team Rating',
+                      data: data,
+                      borderColor: '#2563eb',
+                      backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                      tension: 0.4,
+                      fill: true,
+                      pointRadius: 6,
+                      pointBackgroundColor: '#2563eb'
+                  }]
+              },
+              options: { 
+                  responsive: true, 
+                  maintainAspectRatio: false,
+                  scales: { y: { beginAtZero: true, max: 5 } }
+              }
+          });
+      }, 100);
+    });
   }
 
   editEvaluation(report: any) {
