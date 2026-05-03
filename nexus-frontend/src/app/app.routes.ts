@@ -8,6 +8,8 @@ import { MainDashboardComponent } from './dashboard/dashboard.component';
 import { EmployeeDashboardComponent } from './dashboard/employee-dashboard.component';
 import { ManagerDashboardComponent } from './dashboard/manager-dashboard.component';
 
+import { PerformanceReportComponent } from './performance/performance-report.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -20,7 +22,8 @@ export const routes: Routes = [
       { path: 'dashboard', component: MainDashboardComponent },
       { path: 'my-dashboard', component: EmployeeDashboardComponent },
       { path: 'manager-dashboard', component: ManagerDashboardComponent },
-      { path: 'employees', component: EmployeeComponent }
+      { path: 'employees', component: EmployeeComponent },
+      { path: 'performance', component: PerformanceReportComponent }
     ]
   },
   { path: '**', redirectTo: 'login' }

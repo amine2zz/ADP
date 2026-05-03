@@ -28,12 +28,12 @@ public class DepartmentController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Department> retrieveDepartmentById(@PathVariable Long id) {
+    public ResponseEntity<Department> retrieveDepartmentById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(departmentService.findDepartmentById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Department> updateDepartment(@PathVariable Long id, @RequestBody Department department) {
+    public ResponseEntity<Department> updateDepartment(@PathVariable("id") Long id, @RequestBody Department department) {
         return ResponseEntity.ok(departmentService.updateDepartment(id, department));
     }
 }

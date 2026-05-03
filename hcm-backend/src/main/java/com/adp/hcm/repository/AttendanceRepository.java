@@ -1,6 +1,7 @@
 package com.adp.hcm.repository;
 
 import com.adp.hcm.entity.Attendance;
+import com.adp.hcm.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
@@ -15,4 +16,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<Attendance> findByEmployeeId(@org.springframework.data.repository.query.Param("employeeId") Long employeeId);
 
     Optional<Attendance> findByEmployeeIdAndWorkDate(Long employeeId, LocalDate workDate);
+    
+    List<Attendance> findByEmployeeAndWorkDateBetween(Employee employee, LocalDate start, LocalDate end);
 }

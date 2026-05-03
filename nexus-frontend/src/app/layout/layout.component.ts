@@ -18,6 +18,7 @@ import { NotificationService } from '../services/notification.service';
         <nav class="main-nav">
           <a [routerLink]="dashboardLink" routerLinkActive="active">Dashboard</a>
           <a *ngIf="isAdmin" routerLink="/employees" routerLinkActive="active">Employees</a>
+          <a *ngIf="isAdmin || isManager" routerLink="/performance" routerLinkActive="active">Performance</a>
           <a *ngIf="isManager" routerLink="/my-dashboard" routerLinkActive="active">My Profile</a>
         </nav>
         <div class="user-section">
