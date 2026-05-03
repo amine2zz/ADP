@@ -1,0 +1,12 @@
+@startuml
+skinparam backgroundColor #F8FAFC
+actor User
+rectangle "Frontend (Angular)" as FE
+rectangle "Backend (Spring Boot)" as BE
+database "PostgreSQL" as DB
+
+User -> FE : interacts
+FE -> BE : API requests
+BE -> DB : CRUD
+BE -> [External Services] : notifications/auth
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+skinparam backgroundColor #F8FAFC
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #2C3E50
+}
+package "Frontend" {
+  [Employee Dashboard]
+  [Admin Dashboard]
+}
+package "Backend" {
+  [Employee Service]
+  [Attendance Service]
+}
+node "Database" {
+  [employees]
+  [attendance]
+}
+cloud "External Services" {
+  [OAuth Provider]
+  [Email Service]
+}
+[Employee Dashboard] --> [Employee Service] : REST API
+[Admin Dashboard] --> [Employee Service]
+[Employee Service] --> [employees]
+[Attendance Service] --> [attendance]
+[Employee Service] --> [Email Service] : notifications
+@enduml

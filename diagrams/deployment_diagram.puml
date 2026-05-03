@@ -1,0 +1,16 @@
+@startuml
+node "Client Device" {
+  [Browser / Mobile App]
+}
+
+node "Server" {
+  [Frontend]
+  [Backend]
+}
+
+database "PostgreSQL" as DB
+
+[Browser / Mobile App] --> [Frontend]
+[Frontend] --> [Backend]
+[Backend] --> DB
+@enduml
