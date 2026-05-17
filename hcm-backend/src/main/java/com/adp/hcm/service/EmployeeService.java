@@ -36,9 +36,7 @@ public class EmployeeService {
     }
 
     public List<Employee> getManagers() {
-        return employeeRepository.findAll().stream()
-            .filter(e -> "MANAGER".equals(e.getRole()) || "HR_ADMIN".equals(e.getRole()))
-            .toList();
+        return employeeRepository.findAllManagers();
     }
 
     public Employee createEmployee(Employee employee) {

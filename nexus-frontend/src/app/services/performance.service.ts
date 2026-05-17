@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PerformanceService {
-  private apiUrl = 'http://localhost:8085/api/performance';
+  private apiUrl = `${API_BASE}/performance`;
 
   constructor(private http: HttpClient) {}
 
@@ -45,6 +46,6 @@ export class PerformanceService {
   }
 
   getDepartments(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8085/api/departments');
+    return this.http.get<any[]>(`${API_BASE}/departments`);
   }
 }

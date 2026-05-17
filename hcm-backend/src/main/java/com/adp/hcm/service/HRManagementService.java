@@ -11,10 +11,10 @@ import com.adp.hcm.repository.OperationHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.adp.hcm.shared.LeaveUtils;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -69,14 +69,7 @@ public class HRManagementService {
             Employee emp = employeeRepository.findById(request.getEmployee().getId())
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
             
-            long days = 0;
-            LocalDate current = request.getStartDate();
-            while (!current.isAfter(request.getEndDate())) {
-                if (current.getDayOfWeek().getValue() < 6) { // Monday (1) to Friday (5)
-                    days++;
-                }
-                current = current.plusDays(1);
-            }
+            long days = LeaveUtils.countWeekdays(request.getStartDate(), request.getEndDate());
             
             if ("SICK".equalsIgnoreCase(request.getType())) {
                 double currentSick = emp.getSickLeaveBalance() != null ? emp.getSickLeaveBalance() : 0.0;

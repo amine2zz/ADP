@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
+import { API_BASE } from '../services/api.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -271,12 +272,12 @@ export class ManagerDashboardComponent implements OnInit {
     this.userName = localStorage.getItem('adp_user') || 'Manager';
     this.userId = localStorage.getItem('adp_user_id');
     if (this.userId) {
-      this.http.get<any[]>(`http://localhost:8085/api/manager/${this.userId}/subordinates`).subscribe({
+      this.http.get<any[]>(`${API_BASE}/manager/${this.userId}/subordinates`).subscribe({
         next: (data) => this.subordinates = data,
         error: (err) => console.error("Error fetching subordinates", err)
       });
 
-      this.http.get<any[]>(`http://localhost:8085/api/employees`).subscribe({
+      this.http.get<any[]>(`${API_BASE}/employees`).subscribe({
         next: (employees: any[]) => {
           const me = employees.find((e: any) => e.id === Number(this.userId));
           if (me) { this.employeeData = me; }
@@ -288,11 +289,11 @@ export class ManagerDashboardComponent implements OnInit {
   }
 
   fetchLeaves() {
-      this.http.get<any[]>(`http://localhost:8085/api/hr/manager/${this.userId}/leaves`).subscribe({
+      this.http.get<any[]>(`${API_BASE}/hr/manager/${this.userId}/leaves`).subscribe({
         next: (data) => this.leaves = data,
         error: (err) => console.error(err)
       });
-      this.http.get<any[]>(`http://localhost:8085/api/hr/manager/${this.userId}/attendance`).subscribe({
+      this.http.get<any[]>(`${API_BASE}/hr/manager/${this.userId}/attendance`).subscribe({
         next: (data) => this.attendanceData = data,
         error: (err) => console.error(err)
       });
@@ -300,7 +301,7 @@ export class ManagerDashboardComponent implements OnInit {
 
   updateLeave(leaveId: number, action: string) {
       const email = localStorage.getItem('adp_user') || 'System';
-      this.http.post(`http://localhost:8085/api/hr/leaves/${leaveId}/${action}`, { managerEmail: email }).subscribe({
+      this.http.post(`${API_BASE}/hr/leaves/${leaveId}/${action}`, { managerEmail: email }).subscribe({
           next: () => {
               this.notifService.show(`Leave request ${action}ed!`, 'success');
               this.fetchLeaves(); // refresh
@@ -475,8 +476,8 @@ export class ManagerDashboardComponent implements OnInit {
       if (eveningOut) payload.eveningOut = eveningOut;
 
       const request = this.editAttendanceRecord.id
-          ? this.http.put(`http://localhost:8085/api/hr/attendance/${this.editAttendanceRecord.id}`, payload)
-          : this.http.post(`http://localhost:8085/api/hr/attendance`, payload);
+          ? this.http.put(`${API_BASE}/hr/attendance/${this.editAttendanceRecord.id}`, payload)
+          : this.http.post(`${API_BASE}/hr/attendance`, payload);
 
       request.subscribe({
           next: () => {
@@ -512,3 +513,5 @@ export class ManagerDashboardComponent implements OnInit {
       return s.status;
   }
 }
+
+

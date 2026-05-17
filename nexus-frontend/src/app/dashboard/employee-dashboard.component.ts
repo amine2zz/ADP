@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { API_BASE } from '../services/api.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
@@ -492,7 +493,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
       console.warn('Cannot fetch history: No User ID found');
       return;
     }
-    this.http.get<any[]>(`http://localhost:8085/api/employees/${this.userId}/leaves-history`).subscribe({
+    this.http.get<any[]>(`${API_BASE}/employees/${this.userId}/leaves-history`).subscribe({
       next: (data) => {
         this.myLeaves = Array.isArray(data) ? data.sort((a,b) => b.id - a.id) : [];
         this.cdr.detectChanges();
@@ -503,7 +504,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
-    this.http.get<any[]>(`http://localhost:8085/api/employees/${this.userId}/attendance-history`).subscribe({
+    this.http.get<any[]>(`${API_BASE}/employees/${this.userId}/attendance-history`).subscribe({
       next: (data) => {
         this.myAttendance = Array.isArray(data) ? data : [];
         this.cdr.detectChanges();
@@ -616,7 +617,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
 
   fetchEmployeeData() {
     if (!this.userId) return;
-    this.http.get<any>(`http://localhost:8085/api/employees/${this.userId}/profile`).subscribe({
+    this.http.get<any>(`${API_BASE}/employees/${this.userId}/profile`).subscribe({
       next: (me) => {
         if (me) {
           this.employeeData = me;
@@ -642,7 +643,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     if (!this.userId) return;
     if (isFirstLoad) this.loadingAttendance = true;
     
-    this.http.get<any>(`http://localhost:8085/api/employees/${this.userId}/attendance/today`).subscribe({
+    this.http.get<any>(`${API_BASE}/employees/${this.userId}/attendance/today`).subscribe({
       next: (data) => {
         this.loadingAttendance = false;
         if (data) {
@@ -760,7 +761,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
 
   punch(punchType: string) {
     if (!this.userId) return;
-    this.http.post(`http://localhost:8085/api/employees/${this.userId}/attendance`, { punchType }).subscribe({
+    this.http.post(`${API_BASE}/employees/${this.userId}/attendance`, { punchType }).subscribe({
       next: (data: any) => {
         this.today = {
           ...data,
@@ -794,7 +795,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
       address: (form.elements.namedItem('address') as HTMLInputElement).value
     };
     if (this.userId) {
-      this.http.put(`http://localhost:8085/api/employees/${this.userId}`, payload).subscribe({
+      this.http.put(`${API_BASE}/employees/${this.userId}`, payload).subscribe({
         next: (updatedObj: any) => {
           this.showProfileModal = false;
           this.notifService.show('Profile Updated Successfully', 'success');
@@ -846,7 +847,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.http.post(`http://localhost:8085/api/employees/${this.userId}/leaves`, payload).subscribe({
+    this.http.post(`${API_BASE}/employees/${this.userId}/leaves`, payload).subscribe({
       next: () => { 
         this.notifService.show('Leave request submitted.', 'info'); 
         (event.target as HTMLFormElement).reset(); 
@@ -856,3 +857,5 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     });
   }
 }
+
+

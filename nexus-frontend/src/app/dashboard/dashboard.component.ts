@@ -1,4 +1,5 @@
-import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
+﻿import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
+import { API_BASE } from '../services/api.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -490,19 +491,19 @@ export class MainDashboardComponent implements OnInit {
   }
 
   fetchData() {
-    this.http.get<any[]>('http://localhost:8085/api/employees').subscribe({
+    this.http.get<any[]>('${API_BASE}/employees').subscribe({
         next: (data) => this.allEmployees = data,
         error: (err) => console.error(err)
     });
-    this.http.get<any[]>('http://localhost:8085/api/hr/all-leaves').subscribe({
+    this.http.get<any[]>('${API_BASE}/hr/all-leaves').subscribe({
         next: (data) => this.leaves = data,
         error: (err) => console.error(err)
     });
-    this.http.get<any[]>('http://localhost:8085/api/hr/all-attendance').subscribe({
+    this.http.get<any[]>('${API_BASE}/hr/all-attendance').subscribe({
         next: (data) => this.attendanceData = data,
         error: (err) => console.error(err)
     });
-    this.http.get<any[]>('http://localhost:8085/api/hr/categories').subscribe({
+    this.http.get<any[]>('${API_BASE}/hr/categories').subscribe({
         next: (data) => this.categories = data,
         error: (err) => console.error(err)
     });
@@ -636,8 +637,8 @@ export class MainDashboardComponent implements OnInit {
       if (eveningOut) payload.eveningOut = eveningOut;
 
       const request = this.editAttendanceRecord.id
-          ? this.http.put(`http://localhost:8085/api/hr/attendance/${this.editAttendanceRecord.id}`, payload)
-          : this.http.post(`http://localhost:8085/api/hr/attendance`, payload);
+          ? this.http.put(`${API_BASE}/hr/attendance/${this.editAttendanceRecord.id}`, payload)
+          : this.http.post(`${API_BASE}/hr/attendance`, payload);
 
       request.subscribe({
           next: () => {
@@ -682,14 +683,14 @@ export class MainDashboardComponent implements OnInit {
 
   updateLeave(leaveId: number, action: string) {
       const email = localStorage.getItem('adp_user') || 'System';
-      this.http.post(`http://localhost:8085/api/hr/leaves/${leaveId}/${action}`, { managerEmail: email }).subscribe({
+      this.http.post(`${API_BASE}/hr/leaves/${leaveId}/${action}`, { managerEmail: email }).subscribe({
           next: () => this.fetchData(),
           error: (err) => console.error(err)
       });
   }
 
   fetchMetrics() {
-    this.http.get('http://localhost:8085/api/dashboard/metrics').subscribe({
+    this.http.get('${API_BASE}/dashboard/metrics').subscribe({
       next: (data) => this.metrics = data,
       error: (err) => console.error('Metrics sync failed', err)
     });
@@ -718,12 +719,12 @@ export class MainDashboardComponent implements OnInit {
     this.onAnnualChange();
     
     if (this.selectedCategory) {
-      this.http.put(`http://localhost:8085/api/hr/categories/${this.selectedCategory.id}`, this.policyForm).subscribe({
+      this.http.put(`${API_BASE}/hr/categories/${this.selectedCategory.id}`, this.policyForm).subscribe({
         next: () => { this.resetPolicyForm(); this.fetchMetrics(); this.fetchData(); },
         error: (err) => console.error(err)
       });
     } else {
-      this.http.post('http://localhost:8085/api/hr/categories', this.policyForm).subscribe({
+      this.http.post('${API_BASE}/hr/categories', this.policyForm).subscribe({
         next: () => { this.resetPolicyForm(); this.fetchMetrics(); this.fetchData(); },
         error: (err) => console.error(err)
       });
@@ -752,10 +753,12 @@ export class MainDashboardComponent implements OnInit {
 
   deleteCategory(id: number) {
     if (confirm('Delete this policy?')) {
-      this.http.delete(`http://localhost:8085/api/hr/categories/${id}`).subscribe({
+      this.http.delete(`${API_BASE}/hr/categories/${id}`).subscribe({
         next: () => { this.fetchMetrics(); this.fetchData(); },
         error: (err) => console.error(err)
       });
     }
   }
 }
+
+
