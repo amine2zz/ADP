@@ -1,5 +1,7 @@
 package com.adp.hcm;
 
+import com.adp.hcm.service.FeatureConfigService;
+import com.adp.hcm.service.SuperAdminService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -14,6 +16,16 @@ public class HcmBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(HcmBackendApplication.class, args);
+	}
+
+	@Bean
+	public CommandLineRunner seedData(FeatureConfigService featureConfigService, SuperAdminService superAdminService) {
+		return args -> {
+			featureConfigService.seed();
+			superAdminService.seedSystemConfig();
+			superAdminService.seedLabels();
+			System.out.println(">>> Feature flags, system config, and labels seeded.");
+		};
 	}
 
 	@Bean

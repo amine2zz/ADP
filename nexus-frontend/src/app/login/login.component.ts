@@ -1,20 +1,23 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
+import { AuthService } from '../services/auth.service';
+import { API_BASE } from '../services/api.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [HttpClientModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   constructor(
-    private router: Router, 
+    private router: Router,
     private http: HttpClient,
-    private notifService: NotificationService
+    private notifService: NotificationService,
+    private auth: AuthService
   ) {}
 
   login(event: Event) {
@@ -23,19 +26,15 @@ export class LoginComponent {
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
 
-    this.http.post('http://localhost:8085/api/auth/login', { email, password }).subscribe({
-      next: (user: any) => {
-        // Store session tokens and basic info
-        localStorage.setItem('adp_role', user.role);
-        localStorage.setItem('adp_user', user.firstName + ' ' + user.lastName);
-        localStorage.setItem('adp_user_id', user.id.toString());
-        
-        // Store full user object for instant dashboard hydration
+    this.http.post<any>(`${API_BASE}/auth/login`, { email, password }).subscribe({
+      next: (user) => {
+        this.auth.login(user);
         localStorage.setItem('adp_user_full', JSON.stringify(user));
-        
         this.notifService.show(`Welcome back, ${user.firstName}!`, 'success');
-        
-        if (user.role === 'HR_ADMIN') {
+
+        if (user.role === 'SUPERADMIN') {
+          this.router.navigate(['/superadmin']);
+        } else if (user.role === 'HR_ADMIN') {
           this.router.navigate(['/dashboard']);
         } else if (user.role === 'MANAGER') {
           this.router.navigate(['/manager-dashboard']);
@@ -43,8 +42,8 @@ export class LoginComponent {
           this.router.navigate(['/my-dashboard']);
         }
       },
-      error: (err) => {
-        this.notifService.show("Authentication Failed. Invalid email or password.", 'error');
+      error: () => {
+        this.notifService.show('Authentication Failed. Invalid email or password.', 'error');
       }
     });
   }

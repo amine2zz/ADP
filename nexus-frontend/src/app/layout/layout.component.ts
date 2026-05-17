@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../services/notification.service';
+import { AuthService } from '../services/auth.service';
+import { FeatureFlagService } from '../services/feature-flag.service';
 
 @Component({
   selector: 'app-layout',
@@ -18,8 +20,10 @@ import { NotificationService } from '../services/notification.service';
         <nav class="main-nav">
           <a [routerLink]="dashboardLink" routerLinkActive="active">Dashboard</a>
           <a *ngIf="isAdmin" routerLink="/employees" routerLinkActive="active">Employees</a>
-          <a *ngIf="isAdmin || isManager" routerLink="/performance" routerLinkActive="active">Performance</a>
+          <a *ngIf="(isAdmin || isManager) && featureEnabled('performance')" routerLink="/performance" routerLinkActive="active">Performance</a>
+          <a *ngIf="isAdmin && featureEnabled('recruitment')" routerLink="/recruitment" routerLinkActive="active">Recruitment</a>
           <a *ngIf="isManager" routerLink="/my-dashboard" routerLinkActive="active">My Profile</a>
+          <a *ngIf="isSuperAdmin" routerLink="/superadmin" routerLinkActive="active" class="sa-link">SuperAdmin</a>
         </nav>
         <div class="user-section">
           <div class="user-info">
@@ -54,7 +58,7 @@ import { NotificationService } from '../services/notification.service';
         <div class="footer-links">
           <a>Privacy Policy</a>
           <a>Terms of Service</a>
-          <a>HR Support</a>
+          <a href="/careers" target="_blank">Careers</a>
         </div>
       </footer>
     </div>
@@ -93,6 +97,9 @@ import { NotificationService } from '../services/notification.service';
     }
     .main-nav a:hover { color: var(--adp-red); background: var(--adp-red-light); }
     .main-nav a.active { color: var(--adp-red); background: var(--adp-red-light); }
+    .main-nav a.sa-link { background: #1e293b; color: white; }
+    .main-nav a.sa-link:hover { background: #0f172a; }
+    .main-nav a.sa-link.active { background: #0f172a; color: white; }
 
     .user-section { display: flex; align-items: center; gap: 1rem; }
     .user-info { display: flex; align-items: center; gap: 0.75rem; }
@@ -108,10 +115,9 @@ import { NotificationService } from '../services/notification.service';
 
     .adp-footer { background: var(--adp-charcoal); color: rgba(255,255,255,0.6); padding: 1.25rem 2rem; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
     .footer-links { display: flex; gap: 1.5rem; }
-    .footer-links a { color: rgba(255,255,255,0.5); cursor: pointer; transition: color 0.2s; }
+    .footer-links a { color: rgba(255,255,255,0.5); cursor: pointer; transition: color 0.2s; text-decoration: none; }
     .footer-links a:hover { color: white; }
 
-    /* Toast */
     .toast {
       position: fixed; bottom: 24px; right: -420px;
       background: white;
@@ -138,26 +144,36 @@ import { NotificationService } from '../services/notification.service';
   `]
 })
 export class LayoutComponent implements OnInit {
-  isAdmin: boolean = false;
-  isManager: boolean = false;
-  userName: string = 'User';
-  userInitial: string = 'U';
-  userRole: string = '';
-  dashboardLink: string = '/dashboard';
+  isAdmin = false;
+  isManager = false;
+  isSuperAdmin = false;
+  userName = 'User';
+  userInitial = 'U';
+  userRole = '';
+  dashboardLink = '/dashboard';
   notification$;
 
-  constructor(private notifService: NotificationService) {
+  constructor(
+    private notifService: NotificationService,
+    private auth: AuthService,
+    private flags: FeatureFlagService
+  ) {
     this.notification$ = this.notifService.notification$;
   }
 
   ngOnInit() {
-    const role = localStorage.getItem('adp_role');
+    const role = this.auth.getRole();
     this.isAdmin = role === 'HR_ADMIN';
     this.isManager = role === 'MANAGER';
-    this.userName = localStorage.getItem('adp_user') || 'User';
+    this.isSuperAdmin = role === 'SUPERADMIN';
+    this.userName = this.auth.getUserName() || 'User';
     this.userInitial = this.userName.charAt(0).toUpperCase();
-    this.userRole = (role || '').replace('_', ' ');
-    this.dashboardLink = role === 'MANAGER' ? '/manager-dashboard' : role === 'EMPLOYEE' ? '/my-dashboard' : '/dashboard';
+    this.userRole = role.replace(/_/g, ' ');
+    this.dashboardLink = role === 'MANAGER' ? '/manager-dashboard' : role === 'EMPLOYEE' ? '/my-dashboard' : role === 'SUPERADMIN' ? '/superadmin' : '/dashboard';
+  }
+
+  featureEnabled(key: string): boolean {
+    return this.flags.isEnabled(key);
   }
 
   hideNotification() {
@@ -165,8 +181,6 @@ export class LayoutComponent implements OnInit {
   }
 
   logout() {
-    localStorage.clear();
-    window.location.href = '/login';
+    this.auth.logout();
   }
 }
-

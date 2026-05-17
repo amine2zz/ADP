@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
+import { API_BASE } from '../services/api.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 
@@ -54,7 +55,7 @@ export class InitAdminComponent {
       role: 'HR_ADMIN'
     };
 
-    this.http.post('http://localhost:8085/api/employees', payload).subscribe({
+    this.http.post('${API_BASE}/employees', payload).subscribe({
       next: () => {
         alert("HR Master Admin Created! Check Backend Console for the Setup Token!");
         this.router.navigate(['/login']);
@@ -63,3 +64,5 @@ export class InitAdminComponent {
     });
   }
 }
+
+

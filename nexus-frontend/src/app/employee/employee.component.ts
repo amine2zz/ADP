@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
+import { API_BASE } from '../services/api.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../services/notification.service';
@@ -372,11 +373,11 @@ export class EmployeeComponent implements OnInit {
   ngOnInit() { this.refreshData(); }
 
   refreshData() {
-    this.http.get<any[]>('http://localhost:8085/api/employees').subscribe(d => this.employees = d);
-    this.http.get<any[]>('http://localhost:8085/api/departments').subscribe(d => this.departments = d);
-    this.http.get<any[]>('http://localhost:8085/api/employees/managers').subscribe(d => this.managers = d);
-    this.http.get<any[]>('http://localhost:8085/api/hr/categories').subscribe(d => this.categories = d);
-    this.http.get<any[]>('http://localhost:8085/api/hr/history').subscribe(d => this.history = d);
+    this.http.get<any[]>('${API_BASE}/employees').subscribe(d => this.employees = d);
+    this.http.get<any[]>('${API_BASE}/departments').subscribe(d => this.departments = d);
+    this.http.get<any[]>('${API_BASE}/employees/managers').subscribe(d => this.managers = d);
+    this.http.get<any[]>('${API_BASE}/hr/categories').subscribe(d => this.categories = d);
+    this.http.get<any[]>('${API_BASE}/hr/history').subscribe(d => this.history = d);
   }
 
   openEdit(emp: any) { this.selectedEmployee = { ...emp }; }
@@ -394,7 +395,7 @@ export class EmployeeComponent implements OnInit {
       department: deptId ? { id: Number(deptId) } : null
     };
     if (managerId) payload.manager = { id: Number(managerId) };
-    this.http.post('http://localhost:8085/api/employees', payload).subscribe({
+    this.http.post('${API_BASE}/employees', payload).subscribe({
       next: () => { (event.target as HTMLFormElement).reset(); this.refreshData(); this.notifService.show('Employee created successfully!', 'success'); },
       error: () => this.notifService.show('Creation failed', 'error')
     });
@@ -445,9 +446,11 @@ export class EmployeeComponent implements OnInit {
       leaveBalance: (form.elements.namedItem('leaveBalance') as HTMLInputElement).value,
       sickLeaveBalance: (form.elements.namedItem('sickLeaveBalance') as HTMLInputElement).value
     };
-    this.http.put(`http://localhost:8085/api/employees/${this.selectedEmployee.id}`, payload).subscribe({
+    this.http.put(`${API_BASE}/employees/${this.selectedEmployee.id}`, payload).subscribe({
       next: () => { this.selectedEmployee = null; this.notifService.show('Profile updated successfully', 'success'); this.refreshData(); },
       error: () => this.notifService.show('Update failed', 'error')
     });
   }
 }
+
+

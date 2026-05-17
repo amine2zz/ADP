@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
+import { API_BASE } from '../services/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-setup',
   standalone: true,
-  imports: [HttpClientModule, CommonModule],
+  imports: [CommonModule],
   templateUrl: './setup.component.html',
   styleUrls: ['../login/login.component.css'] // mathematically re-using the ADP login stylesheet!
 })
@@ -37,7 +38,7 @@ export class SetupComponent implements OnInit {
     };
 
     // Fire the exact HTTP POST request to XAMPP Java
-    this.http.post('http://localhost:8085/api/employees/setup', payload).subscribe({
+    this.http.post('${API_BASE}/employees/setup', payload).subscribe({
       next: (res) => {
         alert("Account Activated Successfully! Welcome to ADP Nexus.");
         this.router.navigate(['/login']);
@@ -48,3 +49,5 @@ export class SetupComponent implements OnInit {
     });
   }
 }
+
+
