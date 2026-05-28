@@ -1,0 +1,84 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.adp-header {
+  background-color: var(--adp-white);
+  border-bottom: 2px solid var(--adp-red);
+  padding: 0 1.5rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.adp-logo {
+  height: 32px;
+  width: auto;
+}
+
+.app-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--adp-charcoal);
+  border-left: 1px solid var(--adp-border);
+  padding-left: 1rem;
+}
+
+.main-nav ul {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+.main-nav a {
+  color: var(--adp-dark-gray);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  padding: 1rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.main-nav a:hover, .main-nav a.active {
+  color: var(--adp-red);
+  border-bottom-color: var(--adp-red);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.avatar {
+  background-color: var(--adp-red);
+  color: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: var(--adp-light-gray);
+}

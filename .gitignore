@@ -1,0 +1,19 @@
+# ── Angular (nexus-frontend) ──────────────────────────────────────────────
+nexus-frontend/node_modules/
+nexus-frontend/dist/
+nexus-frontend/.angular/
+nexus-frontend/.env
+
+# ── Spring Boot (hcm-backend) ─────────────────────────────────────────────
+hcm-backend/target/
+hcm-backend/.mvn/wrapper/maven-wrapper.jar
+hcm-backend/*.iml
+hcm-backend/.idea/
+
+# ── OS / IDE ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+*.class

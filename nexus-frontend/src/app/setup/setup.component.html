@@ -1,0 +1,42 @@
+<div class="login-container">
+  <div class="login-box" style="max-width: 500px;">
+    <div class="adp-login-header">
+      <h1 class="logo-text">ADP</h1>
+      <h2>Complete Your Profile</h2>
+      <p style="font-size: 0.85rem; color: var(--adp-dark-gray); margin-top: 0.5rem;">
+        Welcome to Nexus HCM. Please setup your password and fill your personal data.
+      </p>
+    </div>
+
+    <div *ngIf="!token" style="color: var(--adp-red); text-align: center;">
+      Invalid tracking token. Please click the link sent to your email.
+    </div>
+
+    <form class="login-form" (submit)="submitSetup($event)" *ngIf="token">
+
+      <div class="form-group">
+        <label for="password">Create Secure Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••••••" required>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Home Address</label>
+        <input type="text" id="address" name="address" placeholder="123 Corporate Blvd." required>
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" name="phone" placeholder="+1 234 567 890" required>
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" name="dob" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary login-btn">Activate Account</button>
+    </form>
+  </div>
+</div>
