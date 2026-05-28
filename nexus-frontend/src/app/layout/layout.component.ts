@@ -23,6 +23,7 @@ import { SystemConfigService } from '../services/system-config.service';
           <a *ngIf="isAdmin && feat_employeeMgmt" routerLink="/employees" routerLinkActive="active">Employees</a>
           <a *ngIf="isAdmin && feat_orgChart" routerLink="/org-chart" routerLinkActive="active">Org Chart</a>
           <a *ngIf="(isAdmin || isManager) && feat_performance" routerLink="/performance" routerLinkActive="active">Performance</a>
+          <a *ngIf="isAdmin" routerLink="/job-board" routerLinkActive="active">Job Board</a>
           <a *ngIf="isManager" routerLink="/my-dashboard" routerLinkActive="active">My Profile</a>
         </nav>
         <div class="user-section">
