@@ -140,7 +140,10 @@ const API = 'http://localhost:8085/api';
             <div class="pf-row">
               <div class="pf-group">
                 <label>Department</label>
-                <input type="text" [(ngModel)]="form.department" placeholder="e.g. Engineering">
+                <input type="text" [(ngModel)]="form.department" list="dept-list" placeholder="Select or type department">
+                <datalist id="dept-list">
+                  <option *ngFor="let d of allDepartments" [value]="d"></option>
+                </datalist>
               </div>
               <div class="pf-group">
                 <label>Location</label>
@@ -316,6 +319,7 @@ export class JobBoardComponent implements OnInit {
   positions: any[] = [];
   applications: any[] = [];
   managers: any[] = [];
+  employeeDepts: string[] = [];
   summary = { open: 0, draft: 0, closed: 0, total: 0, newApplications: 0 };
 
   posStatusFilter = 'ALL';
@@ -349,13 +353,23 @@ export class JobBoardComponent implements OnInit {
 
   loadManagers() {
     this.http.get<any[]>(`${API}/employees`).subscribe({
-      next: d => this.managers = d.filter(e => e.role === 'MANAGER' || e.role === 'HR_ADMIN'),
+      next: d => {
+        this.managers = d.filter(e => e.role === 'MANAGER' || e.role === 'HR_ADMIN');
+        // collect unique department names from all employees
+        const raw = d.map((e: any) => e.department?.name).filter(Boolean) as string[];
+        this.employeeDepts = [...new Set(raw)].sort();
+      },
       error: () => {}
     });
   }
 
   loadSummary() {
     this.http.get<any>(`${API}/jobs/summary`).subscribe({ next: d => this.summary = d, error: () => {} });
+  }
+
+  get allDepartments(): string[] {
+    const fromPositions = this.positions.map((p: any) => p.department).filter(Boolean) as string[];
+    return [...new Set([...this.employeeDepts, ...fromPositions])].sort();
   }
 
   get filteredPositions() {

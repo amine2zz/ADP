@@ -12,12 +12,14 @@ import { QuickSetupComponent } from './quick-setup/quick-setup.component';
 import { OrgChartComponent } from './org-chart/org-chart.component';
 import { SuperuserDashboardComponent } from './superuser/superuser-dashboard.component';
 import { CareersComponent } from './careers/careers.component';
+import { CareerDetailComponent } from './careers/career-detail.component';
 import { JobBoardComponent } from './job-board/job-board.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'careers', component: CareersComponent },
+  { path: 'careers/position/:id', component: CareerDetailComponent },
   { path: 'setup-account', component: SetupComponent },
   { path: 'init-admin', component: InitAdminComponent },
   { path: 'quick-setup', component: QuickSetupComponent },

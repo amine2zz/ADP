@@ -43,6 +43,12 @@ public class JobApplication {
     @Column(length = 500)
     private String notes;
 
+    @Column(name = "cv_file_name")
+    private String cvFileName;
+
+    @Column(name = "cv_data", columnDefinition = "LONGTEXT")
+    private String cvData;
+
     @PrePersist
     protected void onCreate() {
         if (appliedDate == null) appliedDate = LocalDate.now();

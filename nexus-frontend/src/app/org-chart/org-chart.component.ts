@@ -13,6 +13,8 @@ interface FlatNode {
   isRoot: boolean;
   depth: number;
   reportCount: number;
+  hasChildren: boolean;
+  isCollapsed: boolean;
 }
 
 @Component({
@@ -101,9 +103,13 @@ interface FlatNode {
         <div class="tree-panel card">
           <div class="tree-header">
             <h3 class="panel-title" style="margin:0">Org Tree</h3>
-            <div class="tree-search-wrap">
-              <span>🔍</span>
-              <input type="text" [(ngModel)]="treeSearch" placeholder="Highlight name..." class="tree-search">
+            <div class="tree-controls">
+              <button class="ctrl-btn" (click)="collapseAll()" title="Collapse all nodes">⊟ Collapse All</button>
+              <button class="ctrl-btn" (click)="expandAll()" title="Expand all nodes">⊞ Expand All</button>
+              <div class="tree-search-wrap">
+                <span>🔍</span>
+                <input type="text" [(ngModel)]="treeSearch" placeholder="Highlight name..." class="tree-search">
+              </div>
             </div>
           </div>
 
@@ -115,7 +121,6 @@ interface FlatNode {
 
           <div class="tree-scroll">
 
-            <!-- Roots without children (unrooted nodes shown separately) -->
             <div *ngIf="flatTree.length === 0" class="empty-tree">
               No employees found.
             </div>
@@ -147,9 +152,16 @@ interface FlatNode {
                     </div>
                   </div>
                   <div class="node-right">
-                    <div class="report-count" *ngIf="node.reportCount > 0" title="Direct reports">
-                      👥 {{ node.reportCount }}
-                    </div>
+                    <!-- Collapse/Expand toggle for nodes with children -->
+                    <button *ngIf="node.hasChildren"
+                            class="toggle-btn"
+                            [class.is-collapsed]="node.isCollapsed"
+                            (click)="toggleNode(node.emp.id); $event.stopPropagation()"
+                            [title]="node.isCollapsed ? 'Expand (' + node.reportCount + ' direct reports)' : 'Collapse subtree'">
+                      <span *ngIf="!node.isCollapsed">▼</span>
+                      <span *ngIf="node.isCollapsed">▶</span>
+                      <span class="toggle-count">{{ node.reportCount }}</span>
+                    </button>
                     <button class="quick-assign-btn" (click)="quickAssign(node.emp)" title="Change manager">✎</button>
                   </div>
                 </div>
@@ -253,9 +265,19 @@ interface FlatNode {
 
     /* Tree panel */
     .tree-panel { padding: 1.5rem; }
-    .tree-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .tree-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem; }
+    .tree-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* Control buttons */
+    .ctrl-btn {
+      background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #475569;
+      padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .ctrl-btn:hover { background: #e2e8f0; border-color: #cbd5e1; }
+
     .tree-search-wrap { display: flex; align-items: center; gap: 0.5rem; background: var(--adp-light-gray); border: 1.5px solid var(--adp-border); border-radius: 7px; padding: 0.35rem 0.65rem; }
-    .tree-search { border: none; background: transparent; outline: none; font-size: 0.82rem; font-family: inherit; width: 160px; }
+    .tree-search { border: none; background: transparent; outline: none; font-size: 0.82rem; font-family: inherit; width: 140px; }
 
     .unassigned-bar {
       background: #fffbeb;
@@ -331,8 +353,22 @@ interface FlatNode {
     .node-role-badge.employee { background: #dbeafe; color: #1967D2; }
     .node-dept { font-size: 0.72rem; color: #64748b; }
 
-    .node-right { display: flex; align-items: center; gap: 0.4rem; margin-left: 0.5rem; }
-    .report-count { font-size: 0.7rem; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 0.1rem 0.4rem; border-radius: 10px; white-space: nowrap; }
+    .node-right { display: flex; align-items: center; gap: 0.35rem; margin-left: 0.5rem; }
+
+    /* Toggle collapse/expand button */
+    .toggle-btn {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #64748b;
+      padding: 0.15rem 0.5rem; border-radius: 20px;
+      font-size: 0.68rem; font-weight: 700; cursor: pointer;
+      transition: all 0.15s; flex-shrink: 0; line-height: 1.4;
+      font-family: inherit;
+    }
+    .toggle-btn:hover { border-color: var(--adp-red); color: var(--adp-red); background: #fff1f2; }
+    .toggle-btn.is-collapsed { background: #fdf4ff; border-color: #c4b5fd; color: #7c3aed; }
+    .toggle-btn.is-collapsed:hover { border-color: var(--adp-red); color: var(--adp-red); background: #fff1f2; }
+    .toggle-count { font-size: 0.62rem; opacity: 0.8; }
+
     .quick-assign-btn { background: none; border: 1.5px solid #e2e8f0; color: #94a3b8; width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
     .quick-assign-btn:hover { border-color: var(--adp-red); color: var(--adp-red); background: #fff1f2; }
 
@@ -342,6 +378,7 @@ interface FlatNode {
 export class OrgChartComponent implements OnInit {
   allEmployees: any[] = [];
   flatTree: FlatNode[] = [];
+  collapsed = new Set<number>();
 
   // Assignment form
   assignEmpId: string = '';
@@ -379,7 +416,6 @@ export class OrgChartComponent implements OnInit {
 
   get filteredMgrList() {
     const q = this.mgrSearch.toLowerCase();
-    // All MANAGER + HR_ADMIN can be a reporting manager
     return this.allEmployees.filter(e =>
       (e.role === 'MANAGER' || e.role === 'HR_ADMIN') &&
       e.id !== Number(this.assignEmpId) &&
@@ -391,7 +427,6 @@ export class OrgChartComponent implements OnInit {
     return this.allEmployees.filter(e => e.role === 'MANAGER' || e.role === 'HR_ADMIN');
   }
 
-  // Employees with no manager (show in warning bar only if they are ACTIVE)
   get unassigned() {
     return this.allEmployees.filter(e =>
       !e.manager && e.role === 'EMPLOYEE' && e.status === 'ACTIVE'
@@ -405,7 +440,6 @@ export class OrgChartComponent implements OnInit {
   // ── Tree building ─────────────────────────────────────────────────────
 
   buildTree() {
-    // Root nodes: employees with no manager, sorted: HR_ADMIN first, then MANAGER, then EMPLOYEE
     const roots = this.allEmployees
       .filter(e => !e.manager)
       .sort((a, b) => this.roleOrder(a.role) - this.roleOrder(b.role));
@@ -421,23 +455,54 @@ export class OrgChartComponent implements OnInit {
       .filter(e => e.manager?.id === emp.id)
       .sort((a, b) => this.roleOrder(a.role) - this.roleOrder(b.role));
 
+    const isCollapsed = this.collapsed.has(emp.id);
+
     this.flatTree.push({
       emp,
       ancestors,
       isLast,
       isRoot: ancestors.length === 0,
       depth: ancestors.length,
-      reportCount: children.length
+      reportCount: children.length,
+      hasChildren: children.length > 0,
+      isCollapsed
     });
 
-    const newAncestors = [...ancestors, !isLast];
-    children.forEach((child, i) => {
-      this.flatten(child, newAncestors, i === children.length - 1);
-    });
+    // Only recurse into children if this node is NOT collapsed
+    if (!isCollapsed) {
+      const newAncestors = [...ancestors, !isLast];
+      children.forEach((child, i) => {
+        this.flatten(child, newAncestors, i === children.length - 1);
+      });
+    }
   }
 
   private roleOrder(role: string): number {
     return role === 'HR_ADMIN' ? 0 : role === 'MANAGER' ? 1 : 2;
+  }
+
+  // ── Collapse / Expand ─────────────────────────────────────────────────
+
+  toggleNode(empId: number) {
+    if (this.collapsed.has(empId)) {
+      this.collapsed.delete(empId);
+    } else {
+      this.collapsed.add(empId);
+    }
+    this.buildTree();
+  }
+
+  collapseAll() {
+    this.allEmployees.forEach(e => {
+      const hasChildren = this.allEmployees.some(c => c.manager?.id === e.id);
+      if (hasChildren) this.collapsed.add(e.id);
+    });
+    this.buildTree();
+  }
+
+  expandAll() {
+    this.collapsed.clear();
+    this.buildTree();
   }
 
   // ── Assignment ────────────────────────────────────────────────────────
