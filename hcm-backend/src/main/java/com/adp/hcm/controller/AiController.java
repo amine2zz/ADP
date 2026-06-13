@@ -88,4 +88,53 @@ public class AiController {
     public ResponseEntity<?> getManagerReportHistory(@PathVariable Long managerId) {
         return ResponseEntity.ok(aiReportService.getManagerHistory(managerId));
     }
+
+    /**
+     * HR Admin action: scores an applicant's uploaded CV against the job's
+     * description and requirements.
+     */
+    @PostMapping("/cv-screen/{applicationId}")
+    public ResponseEntity<?> screenCv(@PathVariable Long applicationId) {
+        if (!isFeatureEnabled("feature.ai_cv_screening")) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("error", "The AI CV Screener feature has been disabled by the administrator."));
+        }
+        try {
+            return ResponseEntity.ok(aiReportService.screenCv(applicationId));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("error", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+        } catch (RestClientException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    /**
+     * Generates a personalized 30/60/90-day onboarding plan for an employee.
+     */
+    @PostMapping("/onboarding-plan/{employeeId}")
+    public ResponseEntity<?> generateOnboardingPlan(@PathVariable Long employeeId) {
+        if (!isFeatureEnabled("feature.ai_onboarding")) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("error", "The AI Onboarding Plans feature has been disabled by the administrator."));
+        }
+        try {
+            return ResponseEntity.ok(aiReportService.generateOnboardingPlan(employeeId));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("error", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+        } catch (RestClientException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    /**
+     * Returns previously generated onboarding plans for an employee, most recent first.
+     */
+    @GetMapping("/onboarding-plan/{employeeId}/history")
+    public ResponseEntity<?> getOnboardingHistory(@PathVariable Long employeeId) {
+        return ResponseEntity.ok(aiReportService.getOnboardingHistory(employeeId));
+    }
 }

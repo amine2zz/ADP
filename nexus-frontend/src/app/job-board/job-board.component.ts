@@ -222,7 +222,7 @@ const API = 'http://localhost:8085/api';
           <div style="overflow-x:auto;">
             <table class="adp-table" *ngIf="filteredApps.length > 0; else noAppsT">
               <thead>
-                <tr><th>Applicant</th><th>Position</th><th>Applied</th><th>Cover Letter</th><th>Status</th><th>Actions</th></tr>
+                <tr><th>Applicant</th><th>Position</th><th>Applied</th><th>Cover Letter</th><th>AI Screening</th><th>Status</th><th>Actions</th></tr>
               </thead>
               <tbody>
                 <tr *ngFor="let a of filteredApps">
@@ -233,7 +233,42 @@ const API = 'http://localhost:8085/api';
                   </td>
                   <td style="font-size:0.82rem; color:#475569;">{{ a.position?.title }}</td>
                   <td style="font-size:0.78rem; color:#64748b; white-space:nowrap;">{{ a.appliedDate }}</td>
-                  <td style="max-width:200px; font-size:0.8rem; color:#475569;">{{ a.coverLetter ? truncate(a.coverLetter, 80) : '—' }}</td>
+                  <td style="max-width:200px; font-size:0.8rem; color:#475569;">
+                    <span *ngIf="!a.coverLetter">—</span>
+                    <span *ngIf="a.coverLetter">
+                      {{ truncate(a.coverLetter, 80) }}
+                      <a *ngIf="a.coverLetter.length > 80" (click)="viewCoverLetter(a)" style="cursor:pointer; color:#D0271D; font-weight:600; white-space:nowrap;"> Read more</a>
+                    </span>
+                  </td>
+                  <td style="max-width:240px;">
+                    <div *ngIf="!a.cvFileName" style="font-size:0.72rem; color:#94a3b8;">No CV uploaded</div>
+                    <div *ngIf="a.cvFileName">
+                      <button (click)="viewCv(a)"
+                              style="padding: 0.25rem 0.6rem; background: #fdf2f2; color: #D0271D; border: 1px solid #fbd5d5; border-radius: 4px; font-size: 0.72rem; cursor: pointer; font-weight:600; margin-bottom:0.35rem;">
+                        📄 View CV
+                      </button>
+                      <button *ngIf="a.aiScore == null" (click)="screenCv(a)" [disabled]="screeningId === a.id"
+                              style="padding: 0.25rem 0.6rem; background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; border-radius: 4px; font-size: 0.72rem; cursor: pointer; font-weight:600;">
+                        {{ screeningId === a.id ? '⏳ Screening...' : '✨ AI Screen' }}
+                      </button>
+                      <div *ngIf="a.aiScore != null">
+                        <div style="display:flex; align-items:center; gap:0.4rem;">
+                          <span class="status-badge" [style.background]="scoreBg(a.aiScore)" [style.color]="scoreColor(a.aiScore)" style="font-weight:700;">{{ a.aiScore }}/100</span>
+                          <button (click)="toggleAiDetails(a)" style="padding: 0.15rem 0.45rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.68rem; cursor:pointer;">{{ expandedAi[a.id] ? 'Hide' : 'Details' }}</button>
+                          <button (click)="screenCv(a)" [disabled]="screeningId === a.id" style="padding: 0.15rem 0.45rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.68rem; cursor:pointer;">↻</button>
+                        </div>
+                        <div *ngIf="expandedAi[a.id]" style="margin-top:0.4rem; font-size:0.74rem; color:#475569; background:#faf5ff; border:1px solid #ede9fe; border-radius:6px; padding:0.5rem;">
+                          <div style="margin-bottom:0.35rem;"><strong>Summary:</strong> {{ a.aiSummary }}</div>
+                          <div *ngIf="a.aiStrengths" style="margin-bottom:0.35rem;"><strong>Strengths:</strong>
+                            <ul style="margin:0.2rem 0 0 1rem; padding:0;"><li *ngFor="let s of a.aiStrengths.split('\\n')">{{ s }}</li></ul>
+                          </div>
+                          <div *ngIf="a.aiMissingSkills"><strong>Gaps:</strong>
+                            <ul style="margin:0.2rem 0 0 1rem; padding:0;"><li *ngFor="let s of a.aiMissingSkills.split('\\n')">{{ s }}</li></ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
                   <td>
                     <span class="app-badge"
                           [style.background]="appBg(a.status)"
@@ -248,6 +283,10 @@ const API = 'http://localhost:8085/api';
                       <option value="REJECTED">Rejected</option>
                       <option value="ACCEPTED">Accepted</option>
                     </select>
+                    <button (click)="viewAppDetails(a)"
+                            style="margin-top:0.35rem; padding: 0.25rem 0.6rem; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.72rem; cursor: pointer; font-weight:600; display:block;">
+                      Details
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -255,6 +294,50 @@ const API = 'http://localhost:8085/api';
             <ng-template #noAppsT>
               <p style="text-align:center; padding:2rem; color:#64748b;">No applications found.</p>
             </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cover Letter Modal -->
+    <div class="modal-overlay" *ngIf="coverLetterApp" (click)="coverLetterApp = null">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Cover Letter — {{ coverLetterApp.applicantName }}</h3>
+          <button class="modal-close" (click)="coverLetterApp = null">&times;</button>
+        </div>
+        <p style="white-space:pre-line; line-height:1.6; font-size:0.9rem; color:#334155;">{{ coverLetterApp.coverLetter }}</p>
+      </div>
+    </div>
+
+    <!-- Application Details Modal -->
+    <div class="modal-overlay" *ngIf="detailsApp" (click)="detailsApp = null">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Application Details</h3>
+          <button class="modal-close" (click)="detailsApp = null">&times;</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.88rem; color:#334155;">
+          <div><strong>Applicant:</strong> {{ detailsApp.applicantName }}</div>
+          <div><strong>Email:</strong> {{ detailsApp.applicantEmail }}</div>
+          <div *ngIf="detailsApp.phone"><strong>Phone:</strong> {{ detailsApp.phone }}</div>
+          <div><strong>Position:</strong> {{ detailsApp.position?.title }}</div>
+          <div><strong>Applied:</strong> {{ detailsApp.appliedDate }}</div>
+          <div><strong>Status:</strong>
+            <span class="app-badge" [style.background]="appBg(detailsApp.status)" [style.color]="appColor(detailsApp.status)">{{ detailsApp.status }}</span>
+          </div>
+          <div *ngIf="detailsApp.coverLetter">
+            <strong>Cover Letter:</strong>
+            <p style="white-space:pre-line; line-height:1.6; margin:0.35rem 0 0 0;">{{ detailsApp.coverLetter }}</p>
+          </div>
+          <div *ngIf="detailsApp.cvFileName">
+            <strong>CV:</strong>
+            <a (click)="viewCv(detailsApp)" style="cursor:pointer; color:#D0271D; font-weight:600;"> 📄 {{ detailsApp.cvFileName }}</a>
+          </div>
+          <div *ngIf="!detailsApp.cvFileName"><strong>CV:</strong> No CV uploaded</div>
+          <div *ngIf="detailsApp.aiScore != null">
+            <strong>AI Screening:</strong> {{ detailsApp.aiScore }}/100
+            <p style="white-space:pre-line; line-height:1.6; margin:0.35rem 0 0 0;">{{ detailsApp.aiSummary }}</p>
           </div>
         </div>
       </div>
@@ -329,6 +412,8 @@ export class JobBoardComponent implements OnInit {
   editingId: number | null = null;
   viewingPositionTitle = '';
   viewingPositionId: number | null = null;
+  screeningId: number | null = null;
+  expandedAi: Record<number, boolean> = {};
 
   form: any = this.blankForm();
 
@@ -467,6 +552,64 @@ export class JobBoardComponent implements OnInit {
       next: (u: any) => { app.status = u.status; this.appNotes[app.id + '_status'] = ''; this.loadSummary(); this.notif.show(`Application moved to ${newStatus}.`, 'success'); },
       error: () => this.notif.show('Update failed.', 'error')
     });
+  }
+
+  coverLetterApp: any = null;
+  detailsApp: any = null;
+
+  viewCoverLetter(app: any) {
+    this.coverLetterApp = app;
+  }
+
+  viewAppDetails(app: any) {
+    this.detailsApp = app;
+  }
+
+  viewCv(app: any) {
+    if (!app.cvData) return;
+    const fileName = (app.cvFileName || '').toLowerCase();
+    const mime = fileName.endsWith('.pdf') ? 'application/pdf'
+      : fileName.endsWith('.doc') ? 'application/msword'
+      : fileName.endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      : 'application/octet-stream';
+
+    const byteChars = atob(app.cvData);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+    const blob = new Blob([new Uint8Array(byteNumbers)], { type: mime });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }
+
+  screenCv(app: any) {
+    this.screeningId = app.id;
+    this.http.post<any>(`${API}/ai/cv-screen/${app.id}`, {}).subscribe({
+      next: (u: any) => {
+        Object.assign(app, u);
+        this.screeningId = null;
+        this.expandedAi[app.id] = true;
+        this.notif.show('AI screening complete.', 'success');
+      },
+      error: (err) => {
+        this.screeningId = null;
+        this.notif.show(err?.error?.error || 'AI screening failed.', 'error');
+      }
+    });
+  }
+
+  toggleAiDetails(app: any) {
+    this.expandedAi[app.id] = !this.expandedAi[app.id];
+  }
+
+  scoreBg(score: number): string {
+    if (score >= 75) return '#dcfce7';
+    if (score >= 50) return '#fef3c7';
+    return '#fee2e2';
+  }
+  scoreColor(score: number): string {
+    if (score >= 75) return '#166534';
+    if (score >= 50) return '#92400e';
+    return '#991b1b';
   }
 
   typeLabel(t: string): string {

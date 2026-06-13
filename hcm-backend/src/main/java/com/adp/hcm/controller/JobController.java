@@ -178,6 +178,10 @@ public class JobController {
             app.setApplicantEmail(body.getOrDefault("applicantEmail", "").toString());
             app.setPhone(body.getOrDefault("phone", "").toString());
             app.setCoverLetter(body.getOrDefault("coverLetter", "").toString());
+            Object cvFileName = body.get("cvFileName");
+            Object cvData = body.get("cvData");
+            if (cvFileName != null) app.setCvFileName(cvFileName.toString());
+            if (cvData != null) app.setCvData(cvData.toString());
 
             // Increment counter on position
             pos.setApplicantsCount(pos.getApplicantsCount() + 1);

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
@@ -17,6 +18,8 @@ import { SystemConfigService } from '../services/system-config.service';
           <div *ngIf="!logoImageUrl" class="adp-logo-badge" [style.background]="logoBgColor">{{ logoText }}</div>
           <div class="logo-divider"></div>
           <span class="app-title">{{ companyName }}</span>
+          <button class="logo-refresh-btn" [class.spinning]="refreshingConfig"
+                  title="Refresh branding & settings" (click)="refreshConfig()">↻</button>
         </div>
         <nav class="main-nav">
           <a [routerLink]="dashboardLink" routerLinkActive="active">Dashboard</a>
@@ -83,6 +86,14 @@ import { SystemConfigService } from '../services/system-config.service';
     .adp-logo-badge { background: var(--adp-red); color: white; font-weight: 900; font-size: 1rem; padding: 0.3rem 0.65rem; border-radius: 6px; letter-spacing: -0.5px; }
     .logo-divider { width: 1px; height: 24px; background: var(--adp-border); }
     .app-title { font-weight: 700; font-size: 1.1rem; color: var(--adp-charcoal); }
+    .logo-refresh-btn {
+      background: none; border: none; cursor: pointer; padding: 0.2rem;
+      font-size: 1rem; line-height: 1; color: var(--adp-dark-gray);
+      border-radius: 6px; transition: color 0.2s, background 0.2s;
+    }
+    .logo-refresh-btn:hover { color: var(--adp-red); background: var(--adp-red-light); }
+    .logo-refresh-btn.spinning { animation: logo-spin 0.7s linear infinite; }
+    @keyframes logo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     .main-nav { display: flex; gap: 0.25rem; }
     .main-nav a {
@@ -164,10 +175,13 @@ export class LayoutComponent implements OnInit {
   feat_orgChart: boolean = true;
   feat_employeeMgmt: boolean = true;
 
+  refreshingConfig = false;
+
   constructor(
     private notifService: NotificationService,
     private configSvc: SystemConfigService,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router
   ) {
     this.notification$ = this.notifService.notification$;
   }
@@ -183,6 +197,20 @@ export class LayoutComponent implements OnInit {
 
     // Load + apply latest config (refreshes on every layout init)
     this.configSvc.load(this.http).then(() => this.applyConfig());
+
+    // Keep branding/feature flags in sync automatically as the user
+    // navigates between pages, without a full reload.
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
+      this.configSvc.load(this.http).then(() => this.applyConfig());
+    });
+  }
+
+  refreshConfig() {
+    if (this.refreshingConfig) return;
+    this.refreshingConfig = true;
+    this.configSvc.load(this.http)
+      .then(() => this.applyConfig())
+      .finally(() => setTimeout(() => this.refreshingConfig = false, 400));
   }
 
   private applyConfig() {

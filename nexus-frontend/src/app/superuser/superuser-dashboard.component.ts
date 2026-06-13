@@ -52,6 +52,9 @@ interface Test {
           <button [class.active]="tab==='variables'" (click)="tab='variables'">
             <span class="ni">⚙️</span> Variables
           </button>
+          <button [class.active]="tab==='ai-tuning'" (click)="tab='ai-tuning'">
+            <span class="ni">🤖</span> AI Tuning
+          </button>
           <button [class.active]="tab==='users'"     (click)="tab='users'; loadUsers()">
             <span class="ni">👥</span> Users
           </button>
@@ -261,6 +264,32 @@ interface Test {
           </div>
 
           <button class="btn-save" (click)="saveSection('FEATURE')">💾 Save Feature Settings</button>
+        </div>
+
+        <!-- ════ AI TUNING ════ -->
+        <div *ngIf="tab==='ai-tuning'" class="section slide-up">
+          <div class="sec-head">
+            <h2>AI Tuning</h2>
+            <p>Adjust how the AI behaves across every AI feature (HR reports, manager reports, CV screening, onboarding plans).</p>
+          </div>
+
+          <div class="brand-grid">
+            <div class="brand-group">
+              <div class="group-title">Behavior</div>
+              <div class="setting-card" *ngFor="let c of aiTuningConfigs">
+                <div class="s-label">{{ c.label }}</div>
+                <div class="s-desc">{{ c.description }}</div>
+                <input *ngIf="c.configKey==='ai.temperature'" type="number" min="0" max="1" step="0.1"
+                       class="s-input" [(ngModel)]="c.configValue" placeholder="0.4">
+                <input *ngIf="c.configKey==='ai.tone'" type="text"
+                       class="s-input" [(ngModel)]="c.configValue" placeholder="e.g. professional, concise, and data-driven">
+                <textarea *ngIf="c.configKey==='ai.custom_instructions'" class="s-input" rows="4"
+                          [(ngModel)]="c.configValue" placeholder="Extra instructions appended to every AI prompt..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-save" (click)="saveSection('AI_TUNING')">💾 Save AI Tuning</button>
         </div>
 
         <!-- ════ VARIABLES ════ -->
@@ -953,6 +982,7 @@ export class SuperuserDashboardComponent implements OnInit {
   generalConfigs: any[] = [];
   themeConfigs:   any[] = [];
   featureConfigs: any[] = [];
+  aiTuningConfigs: any[] = [];
 
   // Variables tab
   varFilter   = 'ALL';
@@ -1037,6 +1067,7 @@ export class SuperuserDashboardComponent implements OnInit {
       this.generalConfigs = list.filter(c => c.category === 'GENERAL');
       this.themeConfigs   = list.filter(c => c.category === 'THEME');
       this.featureConfigs = list.filter(c => c.category === 'FEATURE');
+      this.aiTuningConfigs = list.filter(c => c.category === 'AI_TUNING');
     });
   }
 

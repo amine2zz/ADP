@@ -135,6 +135,12 @@ public class DataSeeder {
             seedCfg(configRepo, "feature.quick_setup",   "true",  "FEATURE", "Quick Setup Page",     "Dev bootstrap page for creating test accounts",     true,  "BOOLEAN");
             seedCfg(configRepo, "feature.ai_hr_report",      "true",  "FEATURE", "AI HR Report",         "AI-generated executive workforce report for HR Admins", true,  "BOOLEAN");
             seedCfg(configRepo, "feature.ai_manager_report", "true",  "FEATURE", "AI Manager Team Report","AI-generated team summary report for Managers",      true,  "BOOLEAN");
+            seedCfg(configRepo, "feature.ai_cv_screening",   "true",  "FEATURE", "AI CV Screener",       "AI scoring of uploaded resumes against job requirements", true, "BOOLEAN");
+            seedCfg(configRepo, "feature.ai_onboarding",     "true",  "FEATURE", "AI Onboarding Plans",  "AI-generated 30/60/90 day onboarding plans for employees", true, "BOOLEAN");
+            // AI tuning — adjusts prompts/parameters for every AI feature above
+            seedCfg(configRepo, "ai.temperature",         "0.4", "AI_TUNING", "Response Creativity",  "Model temperature (0.0 = focused/deterministic, 1.0 = more creative)", true, "TEXT");
+            seedCfg(configRepo, "ai.tone",                "professional, concise, and data-driven", "AI_TUNING", "Tone / Persona", "Tone the AI should use across all reports and generated text", true, "TEXT");
+            seedCfg(configRepo, "ai.custom_instructions", "", "AI_TUNING", "Custom Instructions", "Extra instructions appended to every AI prompt (e.g. company-specific rules)", true, "TEXT");
             // Core / non-optional
             seedCfg(configRepo, "feature.dashboard",     "true",  "FEATURE", "Dashboard",            "Core dashboards — always enabled",                  false, "BOOLEAN");
             seedCfg(configRepo, "feature.auth",          "true",  "FEATURE", "Authentication",       "Login & security — cannot be disabled",             false, "BOOLEAN");

@@ -38,8 +38,6 @@ export class LoginComponent {
         localStorage.setItem('adp_user_id', user.id.toString());
         localStorage.setItem('adp_user_full', JSON.stringify(user));
 
-        this.notifService.show(`Welcome back, ${user.firstName}!`, 'success');
-
         if (user.role === 'SUPERUSER') {
           this.router.navigate(['/superuser']);
         } else if (user.role === 'HR_ADMIN') {

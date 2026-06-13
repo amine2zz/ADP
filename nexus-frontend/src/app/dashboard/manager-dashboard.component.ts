@@ -128,9 +128,16 @@ import { NotificationService } from '../services/notification.service';
             <h3 style="color: var(--adp-charcoal); margin: 0 0 0.25rem 0;">🤖 AI Team Report</h3>
             <p style="color: var(--adp-dark-gray); font-size: 0.85rem; margin: 0;">Generate an AI-written summary of your team's attendance, leave requests and performance.</p>
           </div>
-          <button class="btn-primary" [disabled]="aiReportLoading" (click)="generateAiReport()">
+          <button class="btn-primary" [disabled]="aiReportLoading || !hasAnySectionSelected()" (click)="generateAiReport()">
             {{ aiReportLoading ? 'Generating...' : 'Generate AI Team Report' }}
           </button>
+        </div>
+
+        <div class="ai-section-filters">
+          <span class="ai-filter-label">Include in report:</span>
+          <label class="ai-filter-chk"><input type="checkbox" [(ngModel)]="aiSections.attendance"> Attendance</label>
+          <label class="ai-filter-chk"><input type="checkbox" [(ngModel)]="aiSections.leaves"> Leave Requests</label>
+          <label class="ai-filter-chk"><input type="checkbox" [(ngModel)]="aiSections.performance"> Performance Ratings</label>
         </div>
 
         <div *ngIf="aiReportError" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fdecea; border: 1px solid #f5c6cb; border-radius: 6px; color: #b71c1c; font-size: 0.85rem;">
@@ -188,6 +195,25 @@ import { NotificationService } from '../services/notification.service';
             <details *ngFor="let item of aiReportHistory" style="background: #f8f9fa; border: 1px solid var(--adp-border); border-radius: 6px; padding: 0.6rem 0.9rem;">
               <summary style="cursor: pointer; font-size: 0.8rem; color: var(--adp-dark-gray);">{{ item.generatedAt | date:'medium' }}</summary>
               <p style="white-space: pre-line; line-height: 1.6; margin: 0.5rem 0 0 0; font-size: 0.9rem;">{{ item.reportText }}</p>
+
+              <div *ngIf="item.stats" class="ai-kpi-grid" style="margin-top: 0.75rem;">
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ item.stats.teamSize }}</div>
+                  <div class="ai-kpi-label">Team Size</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ item.stats.presentToday }} / {{ item.stats.teamSize }}</div>
+                  <div class="ai-kpi-label">Present Today</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ item.stats.pendingLeavesTotal }}</div>
+                  <div class="ai-kpi-label">Pending Leave Requests</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ item.stats.avgTeamRating ?? 'N/A' }}</div>
+                  <div class="ai-kpi-label">Avg Performance Rating</div>
+                </div>
+              </div>
             </details>
           </div>
         </div>
@@ -259,6 +285,10 @@ import { NotificationService } from '../services/notification.service';
     .ai-kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--adp-charcoal); }
     .ai-kpi-label { font-size: 0.7rem; color: var(--adp-dark-gray); text-transform: uppercase; margin-top: 0.25rem; }
     .ai-chart-block h4 { margin: 0 0 0.75rem 0; color: var(--adp-charcoal); font-size: 0.9rem; }
+    .ai-section-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid var(--adp-border); }
+    .ai-filter-label { font-size: 0.75rem; font-weight: 600; color: var(--adp-dark-gray); text-transform: uppercase; letter-spacing: 0.04em; }
+    .ai-filter-chk { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--adp-charcoal); cursor: pointer; }
+    .ai-filter-chk input { cursor: pointer; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   `]
 })
@@ -280,6 +310,7 @@ export class ManagerDashboardComponent implements OnInit {
   aiReportLoading = false;
   aiReportError: string | null = null;
   aiReportHistory: any[] = [];
+  aiSections = { attendance: true, leaves: true, performance: true };
 
   constructor(private http: HttpClient, private notifService: NotificationService) {}
 
@@ -300,11 +331,16 @@ export class ManagerDashboardComponent implements OnInit {
     }
   }
 
+  hasAnySectionSelected(): boolean {
+    return Object.values(this.aiSections).some(v => v);
+  }
+
   generateAiReport() {
     this.aiReportLoading = true;
     this.aiReportError = null;
     this.aiReport = null;
-    this.http.post<any>(`http://localhost:8085/api/ai/manager-report/${this.userId}`, {}).subscribe({
+    const sections = Object.entries(this.aiSections).filter(([, v]) => v).map(([k]) => k);
+    this.http.post<any>(`http://localhost:8085/api/ai/manager-report/${this.userId}`, { sections }).subscribe({
       next: (data) => {
         this.aiReport = data;
         this.aiReportLoading = false;
@@ -319,7 +355,12 @@ export class ManagerDashboardComponent implements OnInit {
 
   fetchAiReportHistory() {
     this.http.get<any[]>(`http://localhost:8085/api/ai/manager-report/${this.userId}/history`).subscribe({
-      next: (data) => this.aiReportHistory = data,
+      next: (data) => {
+        this.aiReportHistory = data.map(item => ({
+          ...item,
+          stats: item.statsJson ? JSON.parse(item.statsJson) : null
+        }));
+      },
       error: (err) => console.error('Failed to load AI report history', err)
     });
   }

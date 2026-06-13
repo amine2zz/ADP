@@ -37,12 +37,12 @@ export class KeyValuesPipe implements PipeTransform {
 
       <!-- Tab Switcher -->
       <div class="card" style="padding: 1rem; margin-top: 1rem;">
-        <div class="tabs" style="display: flex; gap: 2rem; border-bottom: 1px solid var(--adp-border);">
-          <button (click)="setTab('attendance')" [style.border-bottom]="currentTab === 'attendance' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Attendance</button>
-          <button (click)="setTab('overview')" [style.border-bottom]="currentTab === 'overview' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">System Overview</button>
-          <button (click)="setTab('leaves')" [style.border-bottom]="currentTab === 'leaves' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Global Leaves</button>
-          <button (click)="setTab('policies')" [style.border-bottom]="currentTab === 'policies' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Leave Policies</button>
-          <button (click)="setTab('advances')" [style.border-bottom]="currentTab === 'advances' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600; position: relative;">
+        <div class="tabs" style="margin-bottom: 0;">
+          <button class="tab-btn" [class.active]="currentTab === 'attendance'" (click)="setTab('attendance')">Global Attendance</button>
+          <button class="tab-btn" [class.active]="currentTab === 'overview'" (click)="setTab('overview')">System Overview</button>
+          <button class="tab-btn" [class.active]="currentTab === 'leaves'" (click)="setTab('leaves')">Global Leaves</button>
+          <button class="tab-btn" [class.active]="currentTab === 'policies'" (click)="setTab('policies')">Leave Policies</button>
+          <button class="tab-btn" [class.active]="currentTab === 'advances'" (click)="setTab('advances')" style="position: relative;">
             Salary Advances
             <span *ngIf="advanceSummary.pending > 0" style="position: absolute; top: 6px; right: -4px; background: var(--adp-red); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; font-weight: 700;">{{ advanceSummary.pending }}</span>
           </button>
@@ -129,9 +129,17 @@ export class KeyValuesPipe implements PipeTransform {
                 <h3 style="color: var(--adp-charcoal); margin: 0 0 0.25rem 0;">🤖 AI HR Report</h3>
                 <p style="color: var(--adp-dark-gray); font-size: 0.85rem; margin: 0;">Generate an AI-written executive summary from the latest workforce data.</p>
               </div>
-              <button class="btn-primary" [disabled]="aiReportLoading" (click)="generateAiReport()">
+              <button class="btn-primary" [disabled]="aiReportLoading || !hasAnySectionSelected()" (click)="generateAiReport()">
                 {{ aiReportLoading ? 'Generating...' : 'Generate AI HR Report' }}
               </button>
+            </div>
+
+            <div class="ai-section-filters">
+              <span class="ai-filter-label">Include in report:</span>
+              <label class="ai-filter-chk"><input type="checkbox" [(ngModel)]="aiSections.workforce"> Workforce &amp; Departments</label>
+              <label class="ai-filter-chk"><input type="checkbox" [(ngModel)]="aiSections.leaves"> Leave Requests</label>
+              <label class="ai-filter-chk"><input type="checkbox" [(ngModel)]="aiSections.attendance"> Attendance</label>
+              <label class="ai-filter-chk"><input type="checkbox" [(ngModel)]="aiSections.recruitment"> Recruitment</label>
             </div>
 
             <div *ngIf="aiReportError" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fdecea; border: 1px solid #f5c6cb; border-radius: 6px; color: #b71c1c; font-size: 0.85rem;">
@@ -229,6 +237,45 @@ export class KeyValuesPipe implements PipeTransform {
                 <details *ngFor="let item of aiReportHistory" style="background: #f8f9fa; border: 1px solid var(--adp-border); border-radius: 6px; padding: 0.6rem 0.9rem;">
                   <summary style="cursor: pointer; font-size: 0.8rem; color: var(--adp-dark-gray);">{{ item.generatedAt | date:'medium' }}</summary>
                   <p style="white-space: pre-line; line-height: 1.6; margin: 0.5rem 0 0 0; font-size: 0.9rem;">{{ item.reportText }}</p>
+
+                  <div *ngIf="item.stats" class="ai-kpi-grid" style="margin-top: 0.75rem;">
+                    <div class="ai-kpi">
+                      <div class="ai-kpi-value">{{ item.stats.totalHeadcount }}</div>
+                      <div class="ai-kpi-label">Total Headcount</div>
+                    </div>
+                    <div class="ai-kpi">
+                      <div class="ai-kpi-value">{{ item.stats.activeProfiles }}</div>
+                      <div class="ai-kpi-label">Active Profiles</div>
+                    </div>
+                    <div class="ai-kpi">
+                      <div class="ai-kpi-value">{{ item.stats.pendingSetups }}</div>
+                      <div class="ai-kpi-label">Pending Setups</div>
+                    </div>
+                    <div class="ai-kpi">
+                      <div class="ai-kpi-value">{{ item.stats.presentToday }}</div>
+                      <div class="ai-kpi-label">Present Today</div>
+                    </div>
+                    <div class="ai-kpi">
+                      <div class="ai-kpi-value">{{ item.stats.leaveApprovalRatePct }}%</div>
+                      <div class="ai-kpi-label">Leave Approval Rate</div>
+                    </div>
+                    <div class="ai-kpi">
+                      <div class="ai-kpi-value">{{ item.stats.openPositions }}</div>
+                      <div class="ai-kpi-label">Open Positions</div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="item.stats?.deptDistribution" class="composition-list" style="margin-top: 0.75rem;">
+                    <div *ngFor="let d of item.stats.deptDistribution | keyValues" class="comp-item">
+                      <div class="comp-info">
+                        <span class="comp-name">{{ d.key }}</span>
+                        <span class="comp-count">{{ d.val }} employees</span>
+                      </div>
+                      <div class="comp-bar-bg">
+                        <div class="comp-bar-fill" [style.width.%]="(d.val / item.stats.totalHeadcount) * 100"></div>
+                      </div>
+                    </div>
+                  </div>
                 </details>
               </div>
             </div>
@@ -569,6 +616,10 @@ export class KeyValuesPipe implements PipeTransform {
     .ai-kpi-label { font-size: 0.7rem; color: var(--adp-dark-gray); text-transform: uppercase; margin-top: 0.25rem; }
     .ai-report-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
     .ai-chart-block h4 { margin: 0 0 0.75rem 0; color: var(--adp-charcoal); font-size: 0.9rem; }
+    .ai-section-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid var(--adp-border); }
+    .ai-filter-label { font-size: 0.75rem; font-weight: 600; color: var(--adp-dark-gray); text-transform: uppercase; letter-spacing: 0.04em; }
+    .ai-filter-chk { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--adp-charcoal); cursor: pointer; }
+    .ai-filter-chk input { cursor: pointer; }
     .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .adp-table { width: 100%; border-collapse: collapse; }
     .adp-table th, .adp-table td { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--adp-border); font-size: 0.85rem;}
@@ -628,6 +679,7 @@ export class MainDashboardComponent implements OnInit {
   aiReportLoading = false;
   aiReportError: string | null = null;
   aiReportHistory: any[] = [];
+  aiSections = { workforce: true, leaves: true, attendance: true, recruitment: true };
 
   constructor(private http: HttpClient, private notifService: NotificationService) {}
 
@@ -846,11 +898,16 @@ export class MainDashboardComponent implements OnInit {
     this.fetchData();
   }
 
+  hasAnySectionSelected(): boolean {
+    return Object.values(this.aiSections).some(v => v);
+  }
+
   generateAiReport() {
     this.aiReportLoading = true;
     this.aiReportError = null;
     this.aiReport = null;
-    this.http.post<any>('http://localhost:8085/api/ai/hr-report', {}).subscribe({
+    const sections = Object.entries(this.aiSections).filter(([, v]) => v).map(([k]) => k);
+    this.http.post<any>('http://localhost:8085/api/ai/hr-report', { sections }).subscribe({
       next: (data) => {
         this.aiReport = data;
         this.aiReportLoading = false;
@@ -865,7 +922,12 @@ export class MainDashboardComponent implements OnInit {
 
   fetchAiReportHistory() {
     this.http.get<any[]>('http://localhost:8085/api/ai/hr-report/history').subscribe({
-      next: (data) => this.aiReportHistory = data,
+      next: (data) => {
+        this.aiReportHistory = data.map(item => ({
+          ...item,
+          stats: item.statsJson ? JSON.parse(item.statsJson) : null
+        }));
+      },
       error: (err) => console.error('Failed to load AI report history', err)
     });
   }

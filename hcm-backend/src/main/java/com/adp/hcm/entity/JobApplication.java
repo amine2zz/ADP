@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -48,6 +49,25 @@ public class JobApplication {
 
     @Column(name = "cv_data", columnDefinition = "LONGTEXT")
     private String cvData;
+
+    /** AI CV screening results — populated by AiReportService.screenCv() */
+    @Column(name = "ai_score")
+    private Integer aiScore;
+
+    @Lob
+    @Column(name = "ai_summary", columnDefinition = "TEXT")
+    private String aiSummary;
+
+    @Lob
+    @Column(name = "ai_strengths", columnDefinition = "TEXT")
+    private String aiStrengths;
+
+    @Lob
+    @Column(name = "ai_missing_skills", columnDefinition = "TEXT")
+    private String aiMissingSkills;
+
+    @Column(name = "ai_screened_at")
+    private LocalDateTime aiScreenedAt;
 
     @PrePersist
     protected void onCreate() {

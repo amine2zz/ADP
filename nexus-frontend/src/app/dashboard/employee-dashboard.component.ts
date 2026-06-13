@@ -100,6 +100,9 @@ const API = 'http://localhost:8085/api';
         <button [class.active]="section==='documents'" (click)="section='documents'">
           📄 My Documents
         </button>
+        <button [class.active]="section==='onboarding'" (click)="section='onboarding'; loadOnboardingHistory()">
+          🚀 My Onboarding
+        </button>
       </div>
 
       <!-- ════ LEAVE & ATTENDANCE ════ -->
@@ -381,6 +384,39 @@ const API = 'http://localhost:8085/api';
         <div class="docs-note">
           <span>ℹ️</span>
           All documents are generated from live data. A print/save dialog will open — choose "Save as PDF" in your browser's print dialog.
+        </div>
+      </div>
+
+      <!-- ════ MY ONBOARDING ════ -->
+      <div *ngIf="section==='onboarding'" class="main-grid">
+        <div class="card">
+          <h3 class="section-title">🚀 AI Onboarding Plan</h3>
+          <p style="color:#64748b;font-size:0.85rem;margin-bottom:1rem;">
+            Generate a personalized 30/60/90-day onboarding plan based on your role and department.
+          </p>
+          <button class="btn-primary" (click)="generateOnboardingPlan()" [disabled]="generatingPlan">
+            {{ generatingPlan ? '⏳ Generating...' : '✨ Generate My Onboarding Plan' }}
+          </button>
+
+          <div *ngIf="onboardingError" style="margin-top:1rem;padding:0.75rem;background:#fee2e2;color:#991b1b;border-radius:6px;font-size:0.85rem;">
+            {{ onboardingError }}
+          </div>
+
+          <div *ngIf="latestOnboardingPlan" style="margin-top:1.5rem;">
+            <h4 class="section-title" style="font-size:0.85rem;">Latest Plan — {{ latestOnboardingPlan.generatedAt | date:'dd MMM yyyy, HH:mm' }}</h4>
+            <div style="white-space:pre-wrap;font-size:0.85rem;color:#334155;background:#f8fafc;border:1px solid var(--adp-border);border-radius:6px;padding:1rem;line-height:1.6;">{{ latestOnboardingPlan.planText }}</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">📜 Plan History</h3>
+          <div class="table-container" style="max-height:400px;overflow-y:auto;">
+            <div *ngFor="let p of onboardingHistory" style="border:1px solid var(--adp-border);border-radius:6px;padding:0.75rem;margin-bottom:0.75rem;">
+              <div style="font-size:0.75rem;color:#64748b;font-weight:700;margin-bottom:0.4rem;">{{ p.generatedAt | date:'dd MMM yyyy, HH:mm' }}</div>
+              <div style="white-space:pre-wrap;font-size:0.8rem;color:#334155;line-height:1.5;">{{ p.planText }}</div>
+            </div>
+            <div *ngIf="onboardingHistory.length===0" style="text-align:center;padding:1rem;color:gray;font-size:0.85rem;">No onboarding plans generated yet.</div>
+          </div>
         </div>
       </div>
 
@@ -699,11 +735,17 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
   todayDate = new Date().toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
   // ── New ──
-  section         = 'leave'; // leave | advances | documents
+  section         = 'leave'; // leave | advances | documents | onboarding
   myAdvances: any[] = [];
   advanceAmount   = 0;
   advanceReason   = '';
   advanceSubmitting = false;
+
+  // ── AI Onboarding ──
+  onboardingHistory: any[] = [];
+  latestOnboardingPlan: any = null;
+  generatingPlan = false;
+  onboardingError = '';
 
   get pendingAdvances() { return this.myAdvances.filter(a => a.status === 'PENDING').length; }
 
@@ -754,6 +796,37 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     if (!this.userId) return;
     this.http.get<any[]>(`${API}/advances/employee/${this.userId}`).subscribe({
       next: d => { this.myAdvances = d; this.cdr.detectChanges(); }
+    });
+  }
+
+  loadOnboardingHistory() {
+    if (!this.userId) return;
+    this.http.get<any[]>(`${API}/ai/onboarding-plan/${this.userId}/history`).subscribe({
+      next: d => {
+        this.onboardingHistory = d;
+        this.latestOnboardingPlan = d.length > 0 ? d[0] : null;
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  generateOnboardingPlan() {
+    if (!this.userId) return;
+    this.generatingPlan = true;
+    this.onboardingError = '';
+    this.http.post<any>(`${API}/ai/onboarding-plan/${this.userId}`, {}).subscribe({
+      next: plan => {
+        this.generatingPlan = false;
+        this.latestOnboardingPlan = plan;
+        this.onboardingHistory = [plan, ...this.onboardingHistory];
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        this.generatingPlan = false;
+        this.onboardingError = err?.error?.error || 'Failed to generate onboarding plan.';
+        this.cdr.detectChanges();
+      }
     });
   }
 

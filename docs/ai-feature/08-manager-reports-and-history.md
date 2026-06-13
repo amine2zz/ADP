@@ -155,3 +155,36 @@ for managing the team.
    now appear under **Previous Reports**.
 5. Repeat steps 2-4 as the HR Admin on the System Overview tab to confirm
    the HR-wide history works the same way.
+
+## 7. Report section filters
+
+Both report cards now show **"Include in report"** checkboxes:
+
+- HR report: Workforce & Departments, Leave Requests, Attendance, Recruitment
+- Manager report: Attendance, Leave Requests, Performance Ratings
+
+The selected keys are sent as `{ "sections": [...] }` in the POST body to
+`/api/ai/hr-report` and `/api/ai/manager-report/{managerId}`. On the backend,
+`buildPrompt()` / `buildManagerPrompt()` only include the corresponding blocks
+in the AI prompt — unselected sections are omitted from what the model is
+asked to summarize (an empty/missing `sections` array means "include
+everything", preserving old behavior). The "Generate" button is disabled if
+no section is selected.
+
+## 8. AI feature toggles (Superuser)
+
+Two new `FEATURE`-category `SystemConfig` entries are seeded by `DataSeeder`:
+
+- `feature.ai_hr_report` — "AI HR Report"
+- `feature.ai_manager_report` — "AI Manager Team Report"
+
+Both are `optional=true`, so they show up automatically in the existing
+**Superuser → Features** tab with the same on/off toggle UI as other
+feature flags — no new frontend code was needed there.
+
+`AiController` checks these flags before generating a report
+(`isFeatureEnabled("feature.ai_hr_report")` /
+`isFeatureEnabled("feature.ai_manager_report")`, via `SystemConfigRepository`).
+If a flag is set to `"false"`, the endpoint returns `503 Service Unavailable`
+with a message explaining the feature was disabled by the administrator,
+which surfaces in the dashboard's error banner.

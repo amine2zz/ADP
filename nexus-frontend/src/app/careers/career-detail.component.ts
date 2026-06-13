@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { timeout } from 'rxjs/operators';
 import { SystemConfigService } from '../services/system-config.service';
 
 const API = 'http://localhost:8085/api';
@@ -17,11 +18,15 @@ const API = 'http://localhost:8085/api';
       <!-- Header -->
       <header class="det-header">
         <a routerLink="/careers" class="back-link">← All Positions</a>
-        <a routerLink="/login" class="back-home">
-          <img *ngIf="logoImgUrl" [src]="logoImgUrl" style="height:26px;border-radius:4px;" alt="logo">
-          <div *ngIf="!logoImgUrl" class="logo-badge" [style.background]="logoBg">{{ logoText }}</div>
-          <span class="company-name">{{ companyName }}</span>
-        </a>
+        <div class="logo-group">
+          <a routerLink="/login" class="back-home">
+            <img *ngIf="logoImgUrl" [src]="logoImgUrl" style="height:26px;border-radius:4px;" alt="logo">
+            <div *ngIf="!logoImgUrl" class="logo-badge" [style.background]="logoBg">{{ logoText }}</div>
+            <span class="company-name">{{ companyName }}</span>
+          </a>
+          <button class="logo-refresh-btn" [class.spinning]="refreshingConfig"
+                  title="Refresh branding & settings" (click)="refreshConfig()">↻</button>
+        </div>
         <a routerLink="/login" class="hdr-link">Sign In</a>
       </header>
 
@@ -196,8 +201,17 @@ const API = 'http://localhost:8085/api';
     .back-link { color: #64748b; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: color 0.15s; }
     .back-link:hover { color: #ef4444; }
     .back-home { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; }
+    .logo-group { display: flex; align-items: center; gap: 0.4rem; }
     .logo-badge { color: white; font-weight: 900; font-size: 0.9rem; padding: 0.22rem 0.55rem; border-radius: 5px; }
     .company-name { font-weight: 700; font-size: 1rem; color: #1e293b; }
+    .logo-refresh-btn {
+      background: none; border: none; cursor: pointer; padding: 0.2rem;
+      font-size: 0.95rem; line-height: 1; color: #94a3b8;
+      border-radius: 6px; transition: color 0.2s, background 0.2s;
+    }
+    .logo-refresh-btn:hover { color: #ef4444; background: #fef2f2; }
+    .logo-refresh-btn.spinning { animation: logo-spin 0.7s linear infinite; }
+    @keyframes logo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .hdr-link { color: #ef4444; font-weight: 600; font-size: 0.85rem; text-decoration: none; padding: 0.4rem 0.85rem; border: 1.5px solid #fca5a5; border-radius: 6px; transition: all 0.2s; }
     .hdr-link:hover { background: #fef2f2; }
 
@@ -336,6 +350,15 @@ export class CareerDetailComponent implements OnInit {
 
   applyForm = { applicantName: '', applicantEmail: '', phone: '', coverLetter: '' };
 
+  refreshingConfig = false;
+
+  refreshConfig() {
+    if (this.refreshingConfig) return;
+    this.refreshingConfig = true;
+    this.configSvc.load(this.http)
+      .finally(() => setTimeout(() => this.refreshingConfig = false, 400));
+  }
+
   get logoText()    { return this.configSvc.get('theme.logo_text', 'ADP'); }
   get logoBg()      { return this.configSvc.get('theme.logo_bg', '#D0271D'); }
   get logoImgUrl()  { return this.configSvc.get('theme.logo_image_url', ''); }
@@ -404,10 +427,12 @@ export class CareerDetailComponent implements OnInit {
       cvData: this.cvBase64 || null
     };
 
-    this.http.post(`${API}/jobs/${this.position.id}/apply`, body).subscribe({
+    this.http.post(`${API}/jobs/${this.position.id}/apply`, body).pipe(timeout(30000)).subscribe({
       next: () => { this.applied = true; this.applying = false; },
       error: (e) => {
-        this.applyError = e.error?.error || 'Submission failed. Please try again.';
+        this.applyError = e.error?.error || (e.name === 'TimeoutError'
+          ? 'The request timed out. Please check your connection and try again.'
+          : 'Submission failed. Please try again.');
         this.applying = false;
       }
     });

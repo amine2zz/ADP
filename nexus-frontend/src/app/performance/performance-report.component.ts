@@ -127,7 +127,7 @@ Chart.register(...registerables);
       <!-- Tab Content: Launch -->
       <div *ngIf="activeTab === 'launch'" class="tab-content" style="display: flex; justify-content: center; padding-top: 2rem;">
         <div class="card launch-card" style="max-width: 500px; width: 100%; text-align: center; padding: 3rem 2rem;">
-          <div style="background: #eef2ff; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+          <div style="background: #fdf2f2; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
             <span style="font-size: 2.5rem;">🚀</span>
           </div>
           <h2 style="font-size: 1.75rem; color: #1e293b; margin-bottom: 0.5rem; font-weight: 800;">Launch Evaluation</h2>
@@ -135,10 +135,10 @@ Chart.register(...registerables);
 
           <div style="background: #f8fafc; padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; text-align: left; border: 1px solid #e2e8f0;">
             <label style="display: block; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Target Period</label>
-            <input type="month" [(ngModel)]="launchPeriod" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 1.1rem; font-family: inherit; color: #1e293b; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
+            <input type="month" [(ngModel)]="launchPeriod" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 1.1rem; font-family: inherit; color: #1e293b; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#D0271D'" onblur="this.style.borderColor='#cbd5e1'">
           </div>
 
-          <button class="btn btn-hero" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);" (click)="launchMonthly()">
+          <button class="btn btn-hero" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 15px -3px rgba(208, 39, 29, 0.3);" (click)="launchMonthly()">
             <span>Initialize Survey Now</span>
             <span style="font-size: 1.2rem;">→</span>
           </button>
@@ -226,7 +226,7 @@ Chart.register(...registerables);
     .header h1 {
       font-size: 2.25rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      background: linear-gradient(135deg, #D0271D, #A81E15);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin: 0;
@@ -253,7 +253,7 @@ Chart.register(...registerables);
       transition: all 0.2s;
     }
 
-    .tabs button.active { background: #f1f5f9; color: #2563eb; }
+    .tabs button.active { background: #fdf2f2; color: #D0271D; }
 
     .card {
       background: white;
@@ -295,8 +295,8 @@ Chart.register(...registerables);
       background: white;
       min-height: 52px;
     }
-    .rating-btn span:hover { border-color: #2563eb; background: #eff6ff; }
-    .rating-btn input:checked + span { background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+    .rating-btn span:hover { border-color: #D0271D; background: #fdf2f2; }
+    .rating-btn input:checked + span { background: #D0271D; color: white; border-color: #D0271D; box-shadow: 0 4px 12px rgba(208,39,29,0.25); }
 
     .filters {
       display: flex;
@@ -331,17 +331,17 @@ Chart.register(...registerables);
     .badge { padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; }
     .badge-pending { background: #fef9c3; color: #854d0e; }
     .badge-completed { background: #dcfce7; color: #166534; }
-    .badge-notlaunched { background: #e2e8f0; color: #1d4ed8; }
+    .badge-notlaunched { background: #e2e8f0; color: #A81E15; }
 
     .btn { padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
-    .btn-primary { background: #2563eb; color: white; }
-    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary { background: #D0271D; color: white; }
+    .btn-primary:hover { background: #A81E15; }
     .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #475569; }
-    .btn-outline:hover { border-color: #2563eb; color: #2563eb; }
+    .btn-outline:hover { border-color: #D0271D; color: #D0271D; }
     .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
 
     .btn-hero {
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      background: linear-gradient(135deg, #D0271D, #A81E15);
       color: white;
       font-size: 1.1rem;
       padding: 1rem 2rem;
@@ -391,7 +391,7 @@ Chart.register(...registerables);
     .response-card { padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; margin-bottom: 1rem; }
 
     .rating-display { display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; }
-    .rating-label { font-weight: 600; color: #2563eb; }
+    .rating-label { font-weight: 600; color: #D0271D; }
   `]
 })
 export class PerformanceReportComponent implements OnInit {
@@ -593,7 +593,7 @@ export class PerformanceReportComponent implements OnInit {
             datasets: [{
               label: 'Average Rating (out of 5)',
               data: data,
-              backgroundColor: '#7c3aed',
+              backgroundColor: '#A81E15',
               borderRadius: 4
             }]
           },
@@ -634,12 +634,12 @@ export class PerformanceReportComponent implements OnInit {
             datasets: [{
               label: 'Average Team Rating',
               data: data,
-              borderColor: '#2563eb',
-              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              borderColor: '#D0271D',
+              backgroundColor: 'rgba(208, 39, 29, 0.1)',
               tension: 0.4,
               fill: true,
               pointRadius: 6,
-              pointBackgroundColor: '#2563eb'
+              pointBackgroundColor: '#D0271D'
             }]
           },
           options: {
