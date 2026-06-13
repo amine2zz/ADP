@@ -122,6 +122,117 @@ export class KeyValuesPipe implements PipeTransform {
               </div>
             </div>
           </div>
+
+          <div class="card" style="margin-top: 2rem; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <h3 style="color: var(--adp-charcoal); margin: 0 0 0.25rem 0;">🤖 AI HR Report</h3>
+                <p style="color: var(--adp-dark-gray); font-size: 0.85rem; margin: 0;">Generate an AI-written executive summary from the latest workforce data.</p>
+              </div>
+              <button class="btn-primary" [disabled]="aiReportLoading" (click)="generateAiReport()">
+                {{ aiReportLoading ? 'Generating...' : 'Generate AI HR Report' }}
+              </button>
+            </div>
+
+            <div *ngIf="aiReportError" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fdecea; border: 1px solid #f5c6cb; border-radius: 6px; color: #b71c1c; font-size: 0.85rem;">
+              {{ aiReportError }}
+            </div>
+
+            <div *ngIf="aiReport" class="ai-report">
+              <div class="ai-report-summary">
+                <h4>Executive Summary</h4>
+                <p style="white-space: pre-line; line-height: 1.6; margin: 0;">{{ aiReport.report }}</p>
+                <p class="ai-report-timestamp">Generated {{ aiReport.generatedAt | date:'medium' }}</p>
+              </div>
+
+              <div class="ai-kpi-grid">
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ aiReport.stats?.totalHeadcount }}</div>
+                  <div class="ai-kpi-label">Total Headcount</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ aiReport.stats?.activeProfiles }}</div>
+                  <div class="ai-kpi-label">Active Profiles</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ aiReport.stats?.pendingSetups }}</div>
+                  <div class="ai-kpi-label">Pending Setups</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ aiReport.stats?.presentToday }}</div>
+                  <div class="ai-kpi-label">Present Today</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ aiReport.stats?.leaveApprovalRatePct }}%</div>
+                  <div class="ai-kpi-label">Leave Approval Rate</div>
+                </div>
+                <div class="ai-kpi">
+                  <div class="ai-kpi-value">{{ aiReport.stats?.openPositions }}</div>
+                  <div class="ai-kpi-label">Open Positions</div>
+                </div>
+              </div>
+
+              <div class="ai-report-charts">
+                <div class="ai-chart-block">
+                  <h4>Department Distribution</h4>
+                  <div class="composition-list">
+                    <div *ngFor="let d of aiReport.stats?.deptDistribution | keyValues" class="comp-item">
+                      <div class="comp-info">
+                        <span class="comp-name">{{ d.key }}</span>
+                        <span class="comp-count">{{ d.val }} employees</span>
+                      </div>
+                      <div class="comp-bar-bg">
+                        <div class="comp-bar-fill" [style.width.%]="(d.val / aiReport.stats.totalHeadcount) * 100"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ai-chart-block">
+                  <h4>Leave Requests</h4>
+                  <div class="composition-list">
+                    <div class="comp-item">
+                      <div class="comp-info">
+                        <span class="comp-name">Approved</span>
+                        <span class="comp-count">{{ aiReport.stats?.approvedLeaves }}</span>
+                      </div>
+                      <div class="comp-bar-bg">
+                        <div class="comp-bar-fill" style="background: linear-gradient(90deg, #137333, #34a853);" [style.width.%]="leavePct(aiReport, 'approvedLeaves')"></div>
+                      </div>
+                    </div>
+                    <div class="comp-item">
+                      <div class="comp-info">
+                        <span class="comp-name">Pending</span>
+                        <span class="comp-count">{{ aiReport.stats?.pendingLeaves }}</span>
+                      </div>
+                      <div class="comp-bar-bg">
+                        <div class="comp-bar-fill" style="background: linear-gradient(90deg, #E65100, #f59e0b);" [style.width.%]="leavePct(aiReport, 'pendingLeaves')"></div>
+                      </div>
+                    </div>
+                    <div class="comp-item">
+                      <div class="comp-info">
+                        <span class="comp-name">Rejected</span>
+                        <span class="comp-count">{{ aiReport.stats?.rejectedLeaves }}</span>
+                      </div>
+                      <div class="comp-bar-bg">
+                        <div class="comp-bar-fill" style="background: linear-gradient(90deg, #b71c1c, #D0271D);" [style.width.%]="leavePct(aiReport, 'rejectedLeaves')"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="aiReportHistory.length > 0" style="margin-top: 1.5rem;">
+              <h4 style="color: var(--adp-charcoal); font-size: 0.9rem; margin: 0 0 0.5rem 0;">Previous Reports</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <details *ngFor="let item of aiReportHistory" style="background: #f8f9fa; border: 1px solid var(--adp-border); border-radius: 6px; padding: 0.6rem 0.9rem;">
+                  <summary style="cursor: pointer; font-size: 0.8rem; color: var(--adp-dark-gray);">{{ item.generatedAt | date:'medium' }}</summary>
+                  <p style="white-space: pre-line; line-height: 1.6; margin: 0.5rem 0 0 0; font-size: 0.9rem;">{{ item.reportText }}</p>
+                </details>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Tab 2: Global Leaves -->
@@ -448,6 +559,16 @@ export class KeyValuesPipe implements PipeTransform {
     .bg-green { background: #137333; }
     .bg-blue { background: #1967D2; }
     .bg-red { background: #D0271D; }
+    .ai-report { margin-top: 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .ai-report-summary { padding: 1rem 1.25rem; background: #f8f9fa; border-left: 4px solid var(--adp-red); border-radius: 6px; }
+    .ai-report-summary h4 { margin: 0 0 0.5rem 0; color: var(--adp-charcoal); font-size: 0.9rem; }
+    .ai-report-timestamp { margin: 0.75rem 0 0 0; font-size: 0.7rem; color: var(--adp-dark-gray); }
+    .ai-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+    .ai-kpi { background: #f8f9fa; border: 1px solid var(--adp-border); border-radius: 8px; padding: 0.9rem; text-align: center; }
+    .ai-kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--adp-charcoal); }
+    .ai-kpi-label { font-size: 0.7rem; color: var(--adp-dark-gray); text-transform: uppercase; margin-top: 0.25rem; }
+    .ai-report-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+    .ai-chart-block h4 { margin: 0 0 0.75rem 0; color: var(--adp-charcoal); font-size: 0.9rem; }
     .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .adp-table { width: 100%; border-collapse: collapse; }
     .adp-table th, .adp-table td { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--adp-border); font-size: 0.85rem;}
@@ -502,6 +623,11 @@ export class MainDashboardComponent implements OnInit {
   advanceSearch = '';
   advanceStatusFilter = 'ALL';
   advanceNotes: Record<string, string> = {};
+  // AI HR Report
+  aiReport: any = null;
+  aiReportLoading = false;
+  aiReportError: string | null = null;
+  aiReportHistory: any[] = [];
 
   constructor(private http: HttpClient, private notifService: NotificationService) {}
 
@@ -512,6 +638,7 @@ export class MainDashboardComponent implements OnInit {
     this.fetchMetrics();
     this.fetchData();
     this.loadAdvances();
+    this.fetchAiReportHistory();
   }
 
   setTab(tab: string) {
@@ -717,6 +844,38 @@ export class MainDashboardComponent implements OnInit {
       error: (err) => console.error('Metrics sync failed', err)
     });
     this.fetchData();
+  }
+
+  generateAiReport() {
+    this.aiReportLoading = true;
+    this.aiReportError = null;
+    this.aiReport = null;
+    this.http.post<any>('http://localhost:8085/api/ai/hr-report', {}).subscribe({
+      next: (data) => {
+        this.aiReport = data;
+        this.aiReportLoading = false;
+        this.fetchAiReportHistory();
+      },
+      error: (err) => {
+        this.aiReportError = err?.error?.error || 'Failed to generate the AI report. Please try again.';
+        this.aiReportLoading = false;
+      }
+    });
+  }
+
+  fetchAiReportHistory() {
+    this.http.get<any[]>('http://localhost:8085/api/ai/hr-report/history').subscribe({
+      next: (data) => this.aiReportHistory = data,
+      error: (err) => console.error('Failed to load AI report history', err)
+    });
+  }
+
+  leavePct(report: any, field: string): number {
+    const stats = report?.stats;
+    if (!stats) return 0;
+    const total = (stats.pendingLeaves || 0) + (stats.approvedLeaves || 0) + (stats.rejectedLeaves || 0);
+    if (!total) return 0;
+    return ((stats[field] || 0) / total) * 100;
   }
 
   get filteredLeaves() {

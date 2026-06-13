@@ -133,6 +133,8 @@ public class DataSeeder {
             seedCfg(configRepo, "feature.org_chart",     "true",  "FEATURE", "Organisation Chart",   "Hierarchy tree and manager assignment page",        true,  "BOOLEAN");
             seedCfg(configRepo, "feature.employee_mgmt", "true",  "FEATURE", "Employee Management",  "HR admin provisioning and profile editing",         true,  "BOOLEAN");
             seedCfg(configRepo, "feature.quick_setup",   "true",  "FEATURE", "Quick Setup Page",     "Dev bootstrap page for creating test accounts",     true,  "BOOLEAN");
+            seedCfg(configRepo, "feature.ai_hr_report",      "true",  "FEATURE", "AI HR Report",         "AI-generated executive workforce report for HR Admins", true,  "BOOLEAN");
+            seedCfg(configRepo, "feature.ai_manager_report", "true",  "FEATURE", "AI Manager Team Report","AI-generated team summary report for Managers",      true,  "BOOLEAN");
             // Core / non-optional
             seedCfg(configRepo, "feature.dashboard",     "true",  "FEATURE", "Dashboard",            "Core dashboards — always enabled",                  false, "BOOLEAN");
             seedCfg(configRepo, "feature.auth",          "true",  "FEATURE", "Authentication",       "Login & security — cannot be disabled",             false, "BOOLEAN");

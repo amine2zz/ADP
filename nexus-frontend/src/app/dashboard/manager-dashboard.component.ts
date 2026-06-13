@@ -45,6 +45,7 @@ import { NotificationService } from '../services/notification.service';
           <button (click)="currentTab = 'leaves'" [style.border-bottom]="currentTab === 'leaves' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Leave Requests</button>
           <button (click)="currentTab = 'team'" [style.border-bottom]="currentTab === 'team' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">My Team</button>
           <button (click)="currentTab = 'attendance'" [style.border-bottom]="currentTab === 'attendance' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">Attendance (Pointage)</button>
+          <button (click)="currentTab = 'ai-report'" [style.border-bottom]="currentTab === 'ai-report' ? '3px solid var(--adp-red)' : 'none'" style="background: none; border: none; padding: 1rem 0.5rem; cursor: pointer; font-weight: 600;">🤖 AI Team Report</button>
         </div>
       </div>
 
@@ -121,6 +122,77 @@ import { NotificationService } from '../services/notification.service';
         </div>
       </div>
 
+      <div class="card" *ngIf="currentTab === 'ai-report'" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 style="color: var(--adp-charcoal); margin: 0 0 0.25rem 0;">🤖 AI Team Report</h3>
+            <p style="color: var(--adp-dark-gray); font-size: 0.85rem; margin: 0;">Generate an AI-written summary of your team's attendance, leave requests and performance.</p>
+          </div>
+          <button class="btn-primary" [disabled]="aiReportLoading" (click)="generateAiReport()">
+            {{ aiReportLoading ? 'Generating...' : 'Generate AI Team Report' }}
+          </button>
+        </div>
+
+        <div *ngIf="aiReportError" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fdecea; border: 1px solid #f5c6cb; border-radius: 6px; color: #b71c1c; font-size: 0.85rem;">
+          {{ aiReportError }}
+        </div>
+
+        <div *ngIf="aiReport" class="ai-report">
+          <div class="ai-report-summary">
+            <h4>Executive Summary</h4>
+            <p style="white-space: pre-line; line-height: 1.6; margin: 0;">{{ aiReport.report }}</p>
+            <p class="ai-report-timestamp">Generated {{ aiReport.generatedAt | date:'medium' }}</p>
+          </div>
+
+          <div class="ai-kpi-grid">
+            <div class="ai-kpi">
+              <div class="ai-kpi-value">{{ aiReport.stats?.teamSize }}</div>
+              <div class="ai-kpi-label">Team Size</div>
+            </div>
+            <div class="ai-kpi">
+              <div class="ai-kpi-value">{{ aiReport.stats?.presentToday }} / {{ aiReport.stats?.teamSize }}</div>
+              <div class="ai-kpi-label">Present Today</div>
+            </div>
+            <div class="ai-kpi">
+              <div class="ai-kpi-value">{{ aiReport.stats?.pendingLeavesTotal }}</div>
+              <div class="ai-kpi-label">Pending Leave Requests</div>
+            </div>
+            <div class="ai-kpi">
+              <div class="ai-kpi-value">{{ aiReport.stats?.avgTeamRating ?? 'N/A' }}</div>
+              <div class="ai-kpi-label">Avg Performance Rating</div>
+            </div>
+          </div>
+
+          <div class="ai-chart-block">
+            <h4>Team Breakdown</h4>
+            <div class="table-container">
+              <table class="adp-table">
+                <thead><tr><th>Employee</th><th>Job Title</th><th>Present Today</th><th>Pending Leaves</th><th>Avg Rating</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let emp of aiReport.stats?.employees">
+                    <td><strong>{{ emp.name }}</strong></td>
+                    <td>{{ emp.jobTitle || 'N/A' }}</td>
+                    <td><span class="status-badge" [ngClass]="emp.presentToday ? 'active' : ''">{{ emp.presentToday ? 'Present' : 'Absent' }}</span></td>
+                    <td>{{ emp.pendingLeaves }}</td>
+                    <td>{{ emp.averageRating ?? 'N/A' }} <span *ngIf="emp.evaluationsCompleted" style="color: var(--adp-dark-gray); font-size: 0.75rem;">({{ emp.evaluationsCompleted }} eval(s))</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="aiReportHistory.length > 0" style="margin-top: 1.5rem;">
+          <h4 style="color: var(--adp-charcoal); font-size: 0.9rem; margin: 0 0 0.5rem 0;">Previous Reports</h4>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <details *ngFor="let item of aiReportHistory" style="background: #f8f9fa; border: 1px solid var(--adp-border); border-radius: 6px; padding: 0.6rem 0.9rem;">
+              <summary style="cursor: pointer; font-size: 0.8rem; color: var(--adp-dark-gray);">{{ item.generatedAt | date:'medium' }}</summary>
+              <p style="white-space: pre-line; line-height: 1.6; margin: 0.5rem 0 0 0; font-size: 0.9rem;">{{ item.reportText }}</p>
+            </details>
+          </div>
+        </div>
+      </div>
+
       <div *ngIf="attendanceEditorOpen" class="modal-overlay" (click)="attendanceEditorOpen = false">
         <div class="modal-card" (click)="$event.stopPropagation()">
           <h3 style="margin-bottom: 1rem;">Edit Attendance for {{ editAttendanceRecord.employee.firstName }} {{ editAttendanceRecord.employee.lastName }} on {{ editAttendanceRecord.workDate }}</h3>
@@ -178,6 +250,15 @@ import { NotificationService } from '../services/notification.service';
     .status-badge { padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize;}
     .status-badge.active { background: #E6F4EA; color: #137333; }
     .role-badge { background: #E8F0FE; color: #1967D2; padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;}
+    .ai-report { margin-top: 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .ai-report-summary { padding: 1rem 1.25rem; background: #f8f9fa; border-left: 4px solid var(--adp-red); border-radius: 6px; }
+    .ai-report-summary h4 { margin: 0 0 0.5rem 0; color: var(--adp-charcoal); font-size: 0.9rem; }
+    .ai-report-timestamp { margin: 0.75rem 0 0 0; font-size: 0.7rem; color: var(--adp-dark-gray); }
+    .ai-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+    .ai-kpi { background: #f8f9fa; border: 1px solid var(--adp-border); border-radius: 8px; padding: 0.9rem; text-align: center; }
+    .ai-kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--adp-charcoal); }
+    .ai-kpi-label { font-size: 0.7rem; color: var(--adp-dark-gray); text-transform: uppercase; margin-top: 0.25rem; }
+    .ai-chart-block h4 { margin: 0 0 0.75rem 0; color: var(--adp-charcoal); font-size: 0.9rem; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   `]
 })
@@ -194,6 +275,11 @@ export class ManagerDashboardComponent implements OnInit {
   attendanceEditPayload: any = { morningIn: '', lunchOut: '', afternoonIn: '', eveningOut: '', status: '' };
   weekDays: any[] = [];
   navigationDate: Date = new Date();
+  // AI Team Report
+  aiReport: any = null;
+  aiReportLoading = false;
+  aiReportError: string | null = null;
+  aiReportHistory: any[] = [];
 
   constructor(private http: HttpClient, private notifService: NotificationService) {}
 
@@ -210,7 +296,32 @@ export class ManagerDashboardComponent implements OnInit {
         next: (employees: any[]) => { const me = employees.find((e: any) => e.id === Number(this.userId)); if (me) this.employeeData = me; }
       });
       this.fetchLeaves();
+      this.fetchAiReportHistory();
     }
+  }
+
+  generateAiReport() {
+    this.aiReportLoading = true;
+    this.aiReportError = null;
+    this.aiReport = null;
+    this.http.post<any>(`http://localhost:8085/api/ai/manager-report/${this.userId}`, {}).subscribe({
+      next: (data) => {
+        this.aiReport = data;
+        this.aiReportLoading = false;
+        this.fetchAiReportHistory();
+      },
+      error: (err) => {
+        this.aiReportError = err?.error?.error || 'Failed to generate the AI report. Please try again.';
+        this.aiReportLoading = false;
+      }
+    });
+  }
+
+  fetchAiReportHistory() {
+    this.http.get<any[]>(`http://localhost:8085/api/ai/manager-report/${this.userId}/history`).subscribe({
+      next: (data) => this.aiReportHistory = data,
+      error: (err) => console.error('Failed to load AI report history', err)
+    });
   }
 
   fetchLeaves() {
