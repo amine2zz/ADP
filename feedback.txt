@@ -1,0 +1,27 @@
+etude existant:
+- competetors of ADP
+- critique (cherche outil, pour aider le travail)
+
+
+
+Page de garde
+Logo adp 
+Logo ESPRIT
+Esm projet
+realise par
+annne univ
+
+internship
+page 13 beacoup de texte (logos icones)
+
+we dont say spring MVC
+Logique multi-Couche Orientee service 
+
+Architecture physique et logique (angular)
+Architecture Logique MVVM
+Mon propre developmed by me not from internet
+
+Demo less time (-2 minutes)
+Video des fonctionalités
+
+More Conclusions et future work

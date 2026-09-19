@@ -1,0 +1,77 @@
+@startuml
+top to bottom direction
+
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam actor {
+  BorderColor #2C3E50
+  BackgroundColor #ECF0F1
+}
+skinparam usecase {
+  BorderColor #2C3E50
+  BackgroundColor #FDFEFE
+}
+
+' ── Actors ──────────────────────────────────────────
+actor Employee
+actor Manager
+actor "HR Admin"    as HR
+actor Superuser
+actor "Job Applicant" as Applicant
+
+Manager    --|> Employee
+HR         --|> Employee
+
+' ── System boundary ─────────────────────────────────
+rectangle "Nexus HCM" {
+
+  package "Core HR" {
+    usecase "Authentication"          as UC_AUTH
+    usecase "Attendance Management"   as UC_ATT
+    usecase "Leave Management"        as UC_LEAVE
+    usecase "Performance Management"  as UC_PERF
+    usecase "Salary Advance"          as UC_ADV
+  }
+
+  package "HR Administration" {
+    usecase "Employee Management"     as UC_EMP
+    usecase "Job Recruitment"         as UC_REC
+  }
+
+  package "AI Services" {
+    usecase "AI Report Generation"    as UC_AI_RPT
+    usecase "CV Screening"            as UC_AI_CV
+    usecase "Onboarding Plan"         as UC_AI_OBD
+  }
+
+  package "System Administration" {
+    usecase "System Configuration"    as UC_CONFIG
+    usecase "Automated Test Runner"   as UC_TEST
+  }
+}
+
+' ── Employee (base) ──────────────────────────────────
+Employee --> UC_AUTH
+Employee --> UC_ATT
+Employee --> UC_LEAVE
+Employee --> UC_PERF
+Employee --> UC_ADV
+Employee --> UC_AI_OBD
+
+' ── Manager (extends Employee) ───────────────────────
+Manager --> UC_EMP
+Manager --> UC_AI_RPT
+
+' ── HR Admin (extends Employee) ──────────────────────
+HR --> UC_EMP
+HR --> UC_REC
+HR --> UC_AI_RPT
+HR --> UC_AI_CV
+
+' ── Applicant ────────────────────────────────────────
+Applicant --> UC_REC
+
+' ── Superuser ────────────────────────────────────────
+Superuser --> UC_CONFIG
+Superuser --> UC_TEST
+@enduml

@@ -1,0 +1,246 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam class {
+  BorderColor #2C3E50
+  BackgroundColor #FFFFFF
+  FontColor #2C3E50
+  AttributeFontColor #2C3E50
+  HeaderBackgroundColor #D6EAF8
+  HeaderFontColor #2C3E50
+}
+skinparam enum {
+  BorderColor #2C3E50
+  BackgroundColor #EBF5FB
+  FontColor #2C3E50
+}
+skinparam arrow {
+  Color #2C3E50
+}
+
+' ═══════════════════════════════════════
+' ENUMERATIONS
+' ═══════════════════════════════════════
+
+enum PerformanceRating {
+  STRONGLY_DISAGREE = 1
+  DISAGREE = 2
+  NEUTRAL = 3
+  AGREE = 4
+  STRONGLY_AGREE = 5
+}
+
+' ═══════════════════════════════════════
+' EMPLOYEE HIERARCHY
+' ═══════════════════════════════════════
+
+class Employee {
+  +Long id
+  +String email
+  +String password
+  +String role
+  +String status
+  +LocalDateTime createdAt
+  +String firstName
+  +String lastName
+  +String employeeCode
+  +String jobTitle
+  +String cin
+  +String gender
+  +String phoneNumber
+  +String address
+  +String joiningDate
+  +Double leaveBalance
+  +Double sickLeaveBalance
+  +String activationToken
+  --
+  +login(email, password) : Employee
+  +setupAccount(token, password) : Employee
+  +submitLeaveRequest(request) : LeaveRequest
+  +logAttendance(punchType) : Attendance
+  +getTodayAttendance() : Attendance
+  +getAttendanceHistory() : List
+  +getLeaveHistory() : List
+}
+
+class Manager {
+  --
+  +getSubordinates() : List
+  +getTeamLeaves() : List
+  +getTeamAttendance() : List
+  +approveLeave(leaveId) : LeaveRequest
+  +rejectLeave(leaveId) : LeaveRequest
+  +getPendingEvaluations() : List
+  +submitEvaluation(evalId, responses) : PerformanceEvaluation
+  +getTeamPerformanceHistory() : List
+  +generateTeamAiReport(sections) : Map
+}
+
+class HRAdmin {
+  --
+  +createEmployee(employee) : Employee
+  +quickCreateEmployee(employee, password) : Employee
+  +updateEmployee(id, data) : Employee
+  +assignManager(empId, managerId) : Employee
+  +getAllLeaves() : List
+  +updateAttendance(id, payload) : Attendance
+  +launchMonthlyEvaluation(period) : List
+  +generatePerformanceReports(deptId, period) : List
+  +createJobPosition(data) : JobPosition
+  +publishJobPosition(id) : JobPosition
+  +updateApplicationStatus(appId, status) : JobApplication
+  +screenCvWithAi(applicationId) : JobApplication
+  +generateHrAiReport(sections) : Map
+}
+
+Employee <|-- Manager
+Employee <|-- HRAdmin
+
+' ═══════════════════════════════════════
+' CORE ENTITIES
+' ═══════════════════════════════════════
+
+class Department {
+  +Long id
+  +String name
+  +String description
+  +String location
+  +String budgetCode
+}
+
+class EmployeeCategory {
+  +Long id
+  +String name
+  +Integer annualLeaveAllowance
+  +Integer sickLeaveAllowance
+  +Double monthlyIncrement
+  +String description
+}
+
+class Attendance {
+  +Long id
+  +LocalDateTime morningIn
+  +LocalDateTime lunchOut
+  +LocalDateTime afternoonIn
+  +LocalDateTime eveningOut
+  +LocalDate workDate
+  +String status
+}
+
+class LeaveRequest {
+  +Long id
+  +String type
+  +LocalDate startDate
+  +LocalDate endDate
+  +String reason
+  +String status
+  +LocalDateTime createdAt
+}
+
+class SalaryAdvance {
+  +Long id
+  +Double amount
+  +String reason
+  +String status
+  +LocalDate requestDate
+  +LocalDate reviewDate
+  +String reviewNotes
+}
+
+' ═══════════════════════════════════════
+' PERFORMANCE MODULE
+' ═══════════════════════════════════════
+
+class PerformanceEvaluation {
+  +Long id
+  +String period
+  +String status
+  +LocalDateTime evaluationDate
+  +LocalDateTime createdAt
+}
+
+class PerformanceQuestion {
+  +Long id
+  +String text
+  +Boolean active
+}
+
+class EvaluationResponse {
+  +Long id
+  +PerformanceRating rating
+}
+
+' ═══════════════════════════════════════
+' RECRUITMENT MODULE
+' ═══════════════════════════════════════
+
+class JobPosition {
+  +Long id
+  +String title
+  +String description
+  +String requirements
+  +String jobType
+  +String status
+  +Double salaryMin
+  +Double salaryMax
+  +LocalDate postedDate
+  +LocalDate closingDate
+  +Integer applicantsCount
+}
+
+class JobApplication {
+  +Long id
+  +String applicantName
+  +String applicantEmail
+  +String phone
+  +String status
+  +LocalDate appliedDate
+  +Integer aiScore
+  +String aiSummary
+  +String aiStrengths
+  +String aiMissingSkills
+  +LocalDateTime aiScreenedAt
+}
+
+' ═══════════════════════════════════════
+' AI & AUDIT
+' ═══════════════════════════════════════
+
+class OnboardingPlan {
+  +Long id
+  +String employeeName
+  +String planText
+  +LocalDateTime generatedAt
+}
+
+class AiReportHistory {
+  +Long id
+  +String reportType
+  +String managerName
+  +String reportText
+  +LocalDateTime generatedAt
+}
+
+
+' ═══════════════════════════════════════
+' RELATIONSHIPS
+' ═══════════════════════════════════════
+
+Employee "*" --> "1"    Department
+Employee "*" --> "1"    EmployeeCategory
+
+Attendance    "*" --> "1"    Employee
+LeaveRequest  "*" --> "1"    Employee
+SalaryAdvance "*" --> "0..1" Employee 
+
+PerformanceEvaluation "*"  --> "1"   Employee
+PerformanceEvaluation "1"  *-- "*"   EvaluationResponse
+EvaluationResponse    "*"  --> "1"   PerformanceQuestion
+EvaluationResponse    "*"  --> "1"   PerformanceRating
+
+JobPosition    "*" --> "1"   Employee
+JobApplication "*" --> "1"   JobPosition
+
+OnboardingPlan  "*" --> "1"    Employee
+AiReportHistory "*" --> "0..1" Employee
+@enduml
