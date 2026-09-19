@@ -436,6 +436,10 @@ const API = 'http://localhost:8085/api';
             </div>
           </div>
 
+          <div class="weekend-warning" *ngIf="isWeekendToday">
+            ⚠️ Today is a weekend, those will be counted as extra hours.
+          </div>
+
           <div class="att-modal-timer" *ngIf="activeTimer">
             <span class="timer-label">{{ activeTimer }}</span>
             <span class="timer-value">{{ elapsedDisplay }}</span>
@@ -705,6 +709,7 @@ const API = 'http://localhost:8085/api';
     .stat-value { font-size:1rem; font-weight:800; color:var(--adp-charcoal); }
     .stat-divider { width:1px; height:36px; background:var(--adp-border); flex-shrink:0; }
     .att-summary { margin-top:0.75rem; padding:0.6rem 1rem; background:#f0fdf4; border-radius:6px; font-size:0.82rem; color:#15803d; border:1px solid #bbf7d0; }
+    .weekend-warning { background:#fef9c3; border:1px solid #fde68a; border-radius:8px; padding:0.6rem 1rem; font-size:0.78rem; color:#92400e; font-weight:600; margin-bottom:1rem; }
     .refresh-btn { width:32px; height:32px; border-radius:6px; border:1.5px solid var(--adp-border); background:white; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; color:var(--adp-dark-gray); flex-shrink:0; }
     .refresh-btn:hover { border-color:var(--adp-red); color:var(--adp-red); transform:rotate(180deg); }
 
@@ -733,6 +738,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
   monthDays: any[]    = [];
   navigationDate      = new Date();
   todayDate = new Date().toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  get isWeekendToday(): boolean { const d = new Date().getDay(); return d === 0 || d === 6; }
 
   // ── New ──
   section         = 'leave'; // leave | advances | documents | onboarding
